@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
-
+import 'package:flutter_credit_card_brazilian/credit_card_widget.dart';
 import 'credit_card_model.dart';
 import 'flutter_credit_card.dart';
 
@@ -18,6 +18,8 @@ class CreditCardForm extends StatefulWidget {
     this.textColor = Colors.black,
     this.cursorColor,
     this.localizedText = const LocalizedText(),
+    this.validCardNames,
+    this.invalidCardNameWidget,
   })  : assert(localizedText != null),
         super(key: key);
 
@@ -31,6 +33,8 @@ class CreditCardForm extends StatefulWidget {
   final Color textColor;
   final Color cursorColor;
   final LocalizedText localizedText;
+  final List<String> validCardNames;
+  final Widget invalidCardNameWidget;
 
   @override
   _CreditCardFormState createState() => _CreditCardFormState();
@@ -148,11 +152,17 @@ class _CreditCardFormState extends State<CreditCardForm> {
                   border: const OutlineInputBorder(),
                   labelText: widget.localizedText.cardNumberLabel,
                   hintText: widget.localizedText.cardNumberHint,
+                  errorStyle: const TextStyle(fontSize: 0, height: 0),
                 ),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
+                autovalidateMode: AutovalidateMode.always,
+                validator: (String value) {
+                  return widget.invalidCardNameWidget != null ? '' : null;
+                },
               ),
             ),
+            widget.invalidCardNameWidget != null ? widget.invalidCardNameWidget : Container(),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               margin: const EdgeInsets.only(left: 16, top: 8, right: 16),

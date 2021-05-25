@@ -37,10 +37,10 @@ class CreditCardWidget extends StatefulWidget {
   final LocalizedText localizedText;
   final Function(String) cardName;
   @override
-  _CreditCardWidgetState createState() => _CreditCardWidgetState();
+  CreditCardWidgetState createState() => CreditCardWidgetState();
 }
 
-class _CreditCardWidgetState extends State<CreditCardWidget>
+class CreditCardWidgetState extends State<CreditCardWidget>
     with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> _frontRotation;
@@ -63,8 +63,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
       // Where the linear gradient begins and ends
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
-      // Add one stop for each color. Stops should increase from 0 to 1
-      stops: const <double>[0.1, 0.4, 0.7, 0.9],
       colors: <Color>[
         widget.cardBgColor.withOpacity(1),
         widget.cardBgColor.withOpacity(0.97),
@@ -114,8 +112,8 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
     final Orientation orientation = MediaQuery.of(context).orientation;
-    Future.delayed(Duration.zero, () async {
-      widget.cardName(getCardTypeName(widget.cardNumber));
+    Future<dynamic>.delayed(Duration.zero, () async {
+      return widget.cardName(getCardTypeName(widget.cardNumber));
     });
 
     ///
@@ -128,6 +126,11 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     } else {
       controller.reverse();
     }
+
+    if (detectCCType(widget.cardNumber) == CardType.americanExpress)
+      isAmex = true;
+    else
+      isAmex = false;
 
     return Stack(
       children: <Widget>[
@@ -152,8 +155,8 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     BuildContext context,
     Orientation orientation,
   ) {
-    final TextStyle defaultTextStyle = Theme.of(context).textTheme.title.merge(
-          TextStyle(
+    final TextStyle defaultTextStyle = Theme.of(context).textTheme.headline6.merge(
+          const TextStyle(
             color: Colors.black,
             fontFamily: 'halter',
             fontSize: 16,
@@ -175,8 +178,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
       ),
       margin: const EdgeInsets.all(16),
       width: widget.width ?? width,
-      height: widget.height ??
-          (orientation == Orientation.portrait ? height / 4 : height / 2),
+      height: widget.height ?? height,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,8 +251,8 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     Orientation orientation,
   ) {
     //widget.cardName(getCardTypeName(widget.cardNumber));
-    final TextStyle defaultTextStyle = Theme.of(context).textTheme.title.merge(
-          TextStyle(
+    final TextStyle defaultTextStyle = Theme.of(context).textTheme.headline6.merge(
+          const TextStyle(
             color: Colors.white,
             fontFamily: 'halter',
             fontSize: 16,
@@ -272,8 +274,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
         gradient: backgroundGradientColor,
       ),
       width: widget.width ?? width,
-      height: widget.height ??
-          (orientation == Orientation.portrait ? height / 4 : height / 2),
+      height: widget.height ?? height,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -328,7 +329,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   /// Credit Card prefix patterns as of March 2019
   /// A [List<String>] represents a range.
   /// i.e. ['51', '55'] represents the range of cards starting with '51' to those starting with '55'
-  Map<CardType, Set<List<String>>> cardNumPatterns =
+  static Map<CardType, Set<List<String>>> cardNumPatterns =
       <CardType, Set<List<String>>>{
     CardType.aura: <List<String>>{
       <String>['50'],
@@ -361,12 +362,12 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
       <String>['38'],
       <String>['39'],
     },
-    CardType.jcb: {
+    CardType.jcb: <List<String>>{
       <String>['3506', '3589'],
       <String>['2131'],
       <String>['1800'],
     },
-    CardType.elo: {
+    CardType.elo: <List<String>>{
       <String>['4011'],
       <String>['401178'],
       <String>['401179'],
@@ -395,44 +396,44 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
       <String>['655021', '655058'],
       <String>['6555'],
     },
-    CardType.hiper: {
+    CardType.hiper: <List<String>>{
       <String>['637095'],
       <String>['637568'],
       <String>['637599'],
       <String>['637609'],
       <String>['637612'],
     },
-    CardType.assomise: {
+    CardType.assomise: <List<String>>{
       <String>['639595'],
       <String>['608732'],
     },
-    CardType.fortbrasil: {
+    CardType.fortbrasil: <List<String>>{
       <String>['628167'],
     },
-    CardType.sorocred: {
+    CardType.sorocred: <List<String>>{
       <String>['627892'],
       <String>['606014'],
       <String>['636414'],
     },
-    CardType.realcard: {
+    CardType.realcard: <List<String>>{
       <String>['637176'],
     },
-    CardType.hipercard: {
+    CardType.hipercard: <List<String>>{
       <String>['6062'],
       <String>['384100'],
       <String>['384140'],
       <String>['384160'],
     },
-    CardType.cabal: {
+    CardType.cabal: <List<String>>{
       <String>['60'],
       <String>['99'],
     },
-    CardType.credishop: {
+    CardType.credishop: <List<String>>{
       <String>['603136'],
       <String>['603134'],
       <String>['603135'],
     },
-    CardType.banese: {
+    CardType.banese: <List<String>>{
       <String>['6366'],
       <String>['6361'],
       <String>['6374']
@@ -441,7 +442,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
 
   /// This function determines the Credit Card type based on the cardPatterns
   /// and returns it.
-  CardType detectCCType(String cardNumber) {
+  static CardType detectCCType(String cardNumber) {
     //Default card type is other
     CardType cardType = CardType.otherBrand;
 
@@ -491,7 +492,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
 
   // This method returns the icon for the visa card type if found
   // else will return the empty container
-  Widget getCardTypeIcon(String cardNumber) {
+  static Widget getCardTypeIcon(String cardNumber) {
     Widget icon;
     switch (detectCCType(cardNumber)) {
       case CardType.visa:
@@ -501,7 +502,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.americanExpress:
@@ -511,7 +511,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = true;
         break;
 
       case CardType.mastercard:
@@ -521,7 +520,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.discover:
@@ -531,7 +529,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.assomise:
@@ -541,7 +538,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.aura:
@@ -551,7 +547,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.dinersclub:
@@ -561,7 +556,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.fortbrasil:
@@ -571,7 +565,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.elo:
@@ -581,7 +574,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.hiper:
@@ -591,7 +583,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.hipercard:
@@ -601,7 +592,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.jcb:
@@ -611,7 +601,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.sorocred:
@@ -621,7 +610,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.realcard:
@@ -631,7 +619,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
       case CardType.cabal:
         icon = Image.asset(
@@ -640,7 +627,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.credishop:
@@ -650,7 +636,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       case CardType.banese:
@@ -660,7 +645,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           width: 48,
           package: 'flutter_credit_card_brazilian',
         );
-        isAmex = false;
         break;
 
       default:
@@ -668,7 +652,173 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           height: 48,
           width: 48,
         );
-        isAmex = false;
+        break;
+    }
+    return icon;
+  }
+
+  // This method returns the icon for the visa card type if found
+  // else will return the empty container
+  static Widget getCardTypeIconByCardName(String cardName) {
+    Widget icon;
+    switch (cardName) {
+      case 'VISA':
+        icon = Image.asset(
+          'icons/visa.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'AMEX':
+        icon = Image.asset(
+          'icons/amex.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'MASTERCARD':
+        icon = Image.asset(
+          'icons/mastercard.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'DISCOVER':
+        icon = Image.asset(
+          'icons/discover.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'ASSOMISE':
+        icon = Image.asset(
+          'icons/assomise.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'AURA':
+        icon = Image.asset(
+          'icons/aura.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'DINERS':
+        icon = Image.asset(
+          'icons/dinersclub.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'FORTBRASIL':
+        icon = Image.asset(
+          'icons/fortbrasil.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'ELO':
+        icon = Image.asset(
+          'icons/elo.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'HIPER':
+        icon = Image.asset(
+          'icons/hiper.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'HIPERCARD':
+        icon = Image.asset(
+          'icons/hipercard.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'JCB':
+        icon = Image.asset(
+          'icons/jcb.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'SOROCRED':
+        icon = Image.asset(
+          'icons/sorocred.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'REALCARD':
+        icon = Image.asset(
+          'icons/realcard.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+      case 'CABAL':
+        icon = Image.asset(
+          'icons/cabal.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'CREDISHOP':
+        icon = Image.asset(
+          'icons/credishop.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      case 'BANESECARD':
+        icon = Image.asset(
+          'icons/banese.png',
+          height: 48,
+          width: 48,
+          package: 'flutter_credit_card_brazilian',
+        );
+        break;
+
+      default:
+        icon = Container(
+          height: 48,
+          width: 48,
+        );
         break;
     }
     return icon;
@@ -771,9 +921,9 @@ class MaskedTextController extends TextEditingController {
 
     addListener(() {
       final String previous = _lastUpdatedText;
-      if (this.beforeChange(previous, this.text)) {
+      if (beforeChange(previous, this.text)) {
         updateText(this.text);
-        this.afterChange(previous, this.text);
+        afterChange(previous, this.text);
       } else {
         updateText(_lastUpdatedText);
       }
