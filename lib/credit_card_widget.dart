@@ -119,11 +119,6 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   }
 
   @override
-  void didUpdateWidget(CreditCardWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
