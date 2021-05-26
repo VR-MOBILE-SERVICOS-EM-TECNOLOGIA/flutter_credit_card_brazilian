@@ -17,7 +17,27 @@ class CreditCardWidget extends StatefulWidget {
     this.height,
     this.width,
     this.textStyle,
-    this.cardBgColor = const Color(0xff1b447b),
+    this.frontFontColor = Colors.white,
+    this.backFontColor = Colors.black,
+    this.backgroundGradientColor = const LinearGradient(
+      // Where the linear gradient begins and ends
+      begin: Alignment.bottomRight,
+      end: Alignment.topLeft,
+      colors: <Color>[
+        Color(0xff1b447b),
+        Color(0xff3e6395),
+        Color(0xff6182b0),
+        Color(0xff84a2cb),
+      ],
+    ),
+    this.cardShadow = const <BoxShadow>[
+      BoxShadow(
+        color: Colors.black26,
+        offset: Offset(0, 0),
+        blurRadius: 24,
+      ),
+    ],
+    this.cardBorder = const Border(),
     this.localizedText = const LocalizedText(),
   })  : assert(cardNumber != null),
         assert(showBackView != null),
@@ -29,13 +49,17 @@ class CreditCardWidget extends StatefulWidget {
   final String cardHolderName;
   final String cvvCode;
   final TextStyle textStyle;
-  final Color cardBgColor;
   final bool showBackView;
   final Duration animationDuration;
   final double height;
   final double width;
   final LocalizedText localizedText;
   final Function(String) cardName;
+  final LinearGradient backgroundGradientColor;
+  final List<BoxShadow> cardShadow;
+  final BoxBorder cardBorder;
+  final Color frontFontColor;
+  final Color backFontColor;
   @override
   CreditCardWidgetState createState() => CreditCardWidgetState();
 }
@@ -45,7 +69,6 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   AnimationController controller;
   Animation<double> _frontRotation;
   Animation<double> _backRotation;
-  Gradient backgroundGradientColor;
   bool statusNameCard = true;
   bool isAmex = false;
 
@@ -57,18 +80,6 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     controller = AnimationController(
       duration: widget.animationDuration,
       vsync: this,
-    );
-
-    backgroundGradientColor = LinearGradient(
-      // Where the linear gradient begins and ends
-      begin: Alignment.topRight,
-      end: Alignment.bottomLeft,
-      colors: <Color>[
-        widget.cardBgColor.withOpacity(1),
-        widget.cardBgColor.withOpacity(0.97),
-        widget.cardBgColor.withOpacity(0.90),
-        widget.cardBgColor.withOpacity(0.86),
-      ],
     );
 
     ///Initialize the Front to back rotation tween sequence.
@@ -105,6 +116,11 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(CreditCardWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -156,8 +172,8 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     Orientation orientation,
   ) {
     final TextStyle defaultTextStyle = Theme.of(context).textTheme.headline6.merge(
-          const TextStyle(
-            color: Colors.black,
+          TextStyle(
+            color: widget.backFontColor,
             fontFamily: 'halter',
             fontSize: 16,
             package: 'flutter_credit_card_brazilian',
@@ -167,14 +183,9 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(0, 0),
-            blurRadius: 24,
-          ),
-        ],
-        gradient: backgroundGradientColor,
+        boxShadow: widget.cardShadow,
+        gradient: widget.backgroundGradientColor,
+        border: widget.cardBorder,
       ),
       margin: const EdgeInsets.all(16),
       width: widget.width ?? width,
@@ -252,8 +263,8 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   ) {
     //widget.cardName(getCardTypeName(widget.cardNumber));
     final TextStyle defaultTextStyle = Theme.of(context).textTheme.headline6.merge(
-          const TextStyle(
-            color: Colors.white,
+          TextStyle(
+            color: widget.frontFontColor,
             fontFamily: 'halter',
             fontSize: 16,
             package: 'flutter_credit_card_brazilian',
@@ -264,14 +275,9 @@ class CreditCardWidgetState extends State<CreditCardWidget>
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(0, 0),
-            blurRadius: 24,
-          )
-        ],
-        gradient: backgroundGradientColor,
+        boxShadow: widget.cardShadow,
+        gradient: widget.backgroundGradientColor,
+        border: widget.cardBorder,
       ),
       width: widget.width ?? width,
       height: widget.height ?? height,

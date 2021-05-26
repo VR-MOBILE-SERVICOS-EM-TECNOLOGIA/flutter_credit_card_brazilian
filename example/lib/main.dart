@@ -110,6 +110,23 @@ class MyAppState extends State<MyApp> {
                       cardHolderName: cardHolderName,
                       cvvCode: cvvCode,
                       showBackView: isCvvFocused,
+                      frontFontColor: Colors.grey[700],
+                      backFontColor: Colors.grey[700],
+                      cardBorder: Border(
+                        bottom: BorderSide(color: Colors.grey[400], width: 1),
+                        top: BorderSide(color: Colors.grey[400], width: 1),
+                        left: BorderSide(color: Colors.grey[400], width: 1),
+                        right: BorderSide(color: Colors.grey[400], width: 1),
+                      ),
+                      backgroundGradientColor: const LinearGradient(
+                        // Where the linear gradient begins and ends
+                        begin: Alignment.bottomRight,
+                        end: Alignment.topLeft,
+                        colors: <Color>[
+                          Color(0xffbbbbbb),
+                          Color(0xffeeeeee),
+                        ],
+                      ),
                     ),
                   ),
                 ),
