@@ -49,44 +49,10 @@ class MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  void addCardNameWidget(String cardName) {
-    validCardNames.add(Container(
-      height: 16,
-      width: 20,
-      child: Container(
-        child: CreditCardWidgetState.getCardTypeIconByCardName(cardName)
-      ),
-    ));
-
-    validCardNames.add(Container(
-      height: 16,
-      child: Text(
-        ' ' + cardName + (validCardNamesText.last == cardName ? '' : ', '),
-        style: TextStyle(color: Colors.red[800]),
-        textAlign: TextAlign.left,
-      ),
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
     isCardNameInvalid = validCardNamesText != null && cardName != '' && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
-
-    if (cardNumber != '' && isCardNameInvalid) {
-      validCardNames.clear();
-
-      validCardNames.add(Container(
-        height: 16,
-        child: Text(
-          'Bandeiras válidas:',
-          style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.w900),
-          textAlign: TextAlign.left,
-        ),
-      ));
-
-      validCardNamesText.forEach(addCardNameWidget);
-    }
 
     return Scaffold(
       body: SafeArea(
@@ -96,7 +62,6 @@ class MyAppState extends State<MyApp> {
             child: Column(
               children: <Widget>[
                 Expanded(
-                  flex: 2,
                   child: Container(
                     child: CreditCardWidget(
                       cardName: (String value) {
@@ -110,6 +75,9 @@ class MyAppState extends State<MyApp> {
                       cardHolderName: cardHolderName,
                       cvvCode: cvvCode,
                       showBackView: isCvvFocused,
+                      height: 150,
+                      width: 250,
+                      cardMargin: const EdgeInsets.all(0),
                       frontFontColor: Colors.grey[700],
                       backFontColor: Colors.grey[700],
                       cardBorder: Border(
@@ -131,31 +99,77 @@ class MyAppState extends State<MyApp> {
                   ),
                 ),
                 Expanded(
-                  flex: 3,
-                  child: SingleChildScrollView(
-                    child: CreditCardForm(
-                      validCardNames: validCardNamesText,
-                      cardName: cardName,
-                      invalidCardNameWidget: isCardNameInvalid ? Container(
-                        margin: const EdgeInsets.only(left: 18, top: 8, right: 18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                              child: Text(
-                                'O estabelecimento não aceita essa bandeira para pagamento online.',
-                                style: TextStyle(color: Colors.red[800]),
-                                textAlign: TextAlign.left,
+                  child: LayoutBuilder(
+                    builder: (BuildContext contextLayout, BoxConstraints constraints) {
+                      void addCardNameWidget(String cardName) {
+                        validCardNames.add(Container(
+                          height: constraints.biggest.height / 20,
+                          width: constraints.biggest.width / 20,
+                          child: Container(
+                            child: CreditCardWidgetState.getCardTypeIconByCardName(cardName)
+                          ),
+                        ));
+
+                        validCardNames.add(Container(
+                          height: constraints.biggest.height / 20,
+                          child: Text(
+                            ' ' + cardName + (validCardNamesText.last == cardName ? '' : ', '),
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ));
+                      }
+
+                      if (cardNumber != '' && isCardNameInvalid) {
+                        validCardNames.clear();
+
+                        validCardNames.add(Container(
+                          height: constraints.biggest.height / 20,
+                          child: Text(
+                            'Bandeiras válidas:',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontWeight: FontWeight.w900,
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ));
+
+                        validCardNamesText.forEach(addCardNameWidget);
+                      }
+
+                      return CreditCardForm(
+                        validCardNames: validCardNamesText,
+                        cardName: cardName,
+                        constraints: constraints,
+                        invalidCardNameWidget: isCardNameInvalid ? Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'O estabelecimento não aceita essa bandeira para pagamento online.',
+                                  style: TextStyle(
+                                    color: Colors.red[800],
+                                    fontSize: constraints.biggest.height / 280 * 12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
                               ),
-                            ),
-                            Wrap(
-                              children: validCardNames,
-                            ),
-                          ],
-                        ),
-                      ) : null,
-                      onCreditCardModelChange: onCreditCardModelChange,
-                    ),
+                              Wrap(
+                                children: validCardNames,
+                              ),
+                            ],
+                          ),
+                        ) : null,
+                        onCreditCardModelChange: onCreditCardModelChange,
+                      );
+                    }
                   ),
                 )
               ],

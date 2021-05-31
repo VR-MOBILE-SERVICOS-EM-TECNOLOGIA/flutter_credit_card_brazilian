@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'localized_text_model.dart';
 
@@ -15,10 +16,12 @@ class CreditCardWidget extends StatefulWidget {
     @required this.showBackView,
     this.animationDuration = const Duration(milliseconds: 500),
     this.height,
+    this.cardMargin = const EdgeInsets.all(16),
     this.width,
     this.textStyle,
     this.frontFontColor = Colors.white,
     this.backFontColor = Colors.black,
+    this.fontSizeFactor = 40,
     this.backgroundGradientColor = const LinearGradient(
       // Where the linear gradient begins and ends
       begin: Alignment.bottomRight,
@@ -48,6 +51,7 @@ class CreditCardWidget extends StatefulWidget {
   final String expiryDate;
   final String cardHolderName;
   final String cvvCode;
+  final EdgeInsetsGeometry cardMargin;
   final TextStyle textStyle;
   final bool showBackView;
   final Duration animationDuration;
@@ -60,6 +64,7 @@ class CreditCardWidget extends StatefulWidget {
   final BoxBorder cardBorder;
   final Color frontFontColor;
   final Color backFontColor;
+  final double fontSizeFactor;
   @override
   CreditCardWidgetState createState() => CreditCardWidgetState();
 }
@@ -120,8 +125,6 @@ class CreditCardWidgetState extends State<CreditCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
-    final double width = MediaQuery.of(context).size.width;
     final Orientation orientation = MediaQuery.of(context).orientation;
     Future<dynamic>.delayed(Duration.zero, () async {
       return widget.cardName(getCardTypeName(widget.cardNumber));
@@ -143,17 +146,24 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     else
       isAmex = false;
 
-    return Stack(
-      children: <Widget>[
-        AnimationCard(
-          animation: _frontRotation,
-          child: buildFrontContainer(width, height, context, orientation),
-        ),
-        AnimationCard(
-          animation: _backRotation,
-          child: buildBackContainer(width, height, context, orientation),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (BuildContext contextLayout, BoxConstraints constraints) {
+        final double height = widget.height ?? constraints.biggest.height;
+        final double width = widget.width ?? constraints.biggest.width;
+
+        return Stack(
+          children: <Widget>[
+            AnimationCard(
+              animation: _frontRotation,
+              child: buildFrontContainer(width, height, contextLayout, orientation),
+            ),
+            AnimationCard(
+              animation: _backRotation,
+              child: buildBackContainer(width, height, contextLayout, orientation),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -170,7 +180,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           TextStyle(
             color: widget.backFontColor,
             fontFamily: 'halter',
-            fontSize: 16,
+            fontSize: widget.fontSizeFactor * (height / 592),
             package: 'flutter_credit_card_brazilian',
           ),
         );
@@ -182,9 +192,9 @@ class CreditCardWidgetState extends State<CreditCardWidget>
         gradient: widget.backgroundGradientColor,
         border: widget.cardBorder,
       ),
-      margin: const EdgeInsets.all(16),
-      width: widget.width ?? width,
-      height: widget.height ?? height,
+      margin: widget.cardMargin,
+      width: width,
+      height: height,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +202,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           Expanded(
             flex: 2,
             child: Container(
-              margin: const EdgeInsets.only(top: 16),
+              margin: EdgeInsets.only(top: height / 100 * 3),
               height: 48,
               color: Colors.black,
             ),
@@ -200,7 +210,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           Expanded(
             flex: 2,
             child: Container(
-              margin: const EdgeInsets.only(top: 16),
+              margin: EdgeInsets.only(top: height / 100 * 3),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -216,7 +226,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
                     child: Container(
                       color: Colors.white,
                       child: Padding(
-                        padding: const EdgeInsets.all(5),
+                        padding: EdgeInsets.all((width + height) / 100 * 0.7),
                         child: Text(
                           widget.cvvCode.isEmpty
                               ? isAmex ? 'XXXX' : widget.localizedText.cvvHint
@@ -236,7 +246,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
             child: Align(
               alignment: Alignment.bottomRight,
               child: Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                padding: EdgeInsets.only(left: width / 60 * 2.5, right: width / 60 * 2.5, bottom: height / 100 * 3),
                 child: getCardTypeIcon(widget.cardNumber),
               ),
             ),
@@ -261,34 +271,36 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           TextStyle(
             color: widget.frontFontColor,
             fontFamily: 'halter',
-            fontSize: 16,
+            fontSize: widget.fontSizeFactor * (height / 592),
             package: 'flutter_credit_card_brazilian',
           ),
         );
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: widget.cardMargin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         boxShadow: widget.cardShadow,
         gradient: widget.backgroundGradientColor,
         border: widget.cardBorder,
       ),
-      width: widget.width ?? width,
-      height: widget.height ?? height,
+      width: width,
+      height: height,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-              child: getCardTypeIcon(widget.cardNumber),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.only(left: width / 60 * 2.5, right: width / 60 * 2.5, top: height / 100 * 1.3),
+                child: getCardTypeIcon(widget.cardNumber),
+              ),
             ),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 16),
+              padding: EdgeInsets.only(left: width / 60 * 2.5),
               child: Text(
                 widget.cardNumber.isEmpty || widget.cardNumber == null
                     ? widget.localizedText.cardNumberHint
@@ -300,7 +312,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           Expanded(
             flex: 1,
             child: Padding(
-              padding: const EdgeInsets.only(left: 16),
+              padding: EdgeInsets.only(left: width / 60 * 2.5),
               child: Text(
                 widget.expiryDate.isEmpty || widget.expiryDate == null
                     ? widget.localizedText.expiryDateHint
@@ -311,7 +323,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              padding: EdgeInsets.only(left: width / 60 * 2.5, right: width / 60 * 2.5, bottom: height / 60 * 1.3),
               child: Text(
                 widget.cardHolderName.isEmpty || widget.cardHolderName == null
                     ? widget.localizedText.cardHolderLabel.toUpperCase()
@@ -501,6 +513,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/visa.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -510,6 +523,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/amex.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -519,6 +533,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/mastercard.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -528,6 +543,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/discover.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -537,6 +553,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/assomise.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -546,6 +563,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/aura.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -555,6 +573,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/dinersclub.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -564,6 +583,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/fortbrasil.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -573,6 +593,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/elo.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -582,6 +603,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/hiper.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -591,6 +613,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/hipercard.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -600,6 +623,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/jcb.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -609,6 +633,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/sorocred.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -618,6 +643,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/realcard.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -626,6 +652,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/cabal.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -635,6 +662,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/credishop.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -644,6 +672,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           'icons/banese.png',
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
           package: 'flutter_credit_card_brazilian',
         );
         break;
@@ -652,6 +681,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
         icon = Container(
           height: 48,
           width: 48,
+          alignment: Alignment.topRight,
         );
         break;
     }
