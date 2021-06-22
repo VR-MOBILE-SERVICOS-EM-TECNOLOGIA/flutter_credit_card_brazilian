@@ -40,9 +40,10 @@ class MyAppState extends State<MyApp> {
   String cvvCode = '';
   bool isCvvFocused = false;
   bool isCardNameInvalid = false;
+  bool isCardNumberInvalid = false;
   MediaQueryData mediaQueryData;
   List<Widget> validCardNames = <Widget>[];
-  List<String> validCardNamesText = const <String>['VISA', 'AMEX', 'HIPERCARD'];
+  List<String> validCardNamesText = const <String>['VISA', 'MASTERCARD', 'HIPERCARD', 'ELO'];
 
   @override
   void initState() {
@@ -52,7 +53,63 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
-    isCardNameInvalid = validCardNamesText != null && cardName != '' && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
+    cardName = CreditCardWidgetState.getCardTypeName(cardNumber);
+    isCardNameInvalid = validCardNamesText != null && cardNumber.replaceAll(' ', '').length > 5 && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
+    final ScrollController creditCardFormScrollController = ScrollController();
+    final List<CardNameConfig> cardNamesConfigs = <CardNameConfig>[
+      const CardNameConfig(
+        name: 'ELO',
+        url: null,
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xff324f6c),
+            Color(0xff50a4ac),
+          ],
+        ),
+      ),
+      const CardNameConfig(
+        name: 'VISA',
+        url: null,
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xff00379f),
+            Color(0xff00bcfc),
+          ],
+        ),
+      ),
+      const CardNameConfig(
+        name: 'MASTERCARD',
+        url: null,
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xff2d4470),
+            Color(0xff4998b3),
+          ],
+        ),
+      ),
+      const CardNameConfig(
+        name: 'HIPERCARD',
+        url: null,
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xff913c3c),
+            Color(0xffbe6060),
+          ],
+        ),
+      ),
+    ];
 
     return Scaffold(
       body: SafeArea(
@@ -64,29 +121,27 @@ class MyAppState extends State<MyApp> {
                 Expanded(
                   child: Container(
                     child: CreditCardWidget(
-                      cardName: (String value) {
-                        if (cardName != value)
-                          setState(() {
-                            cardName = value;
-                          });
-                      },
                       cardNumber: cardNumber,
                       expiryDate: expiryDate,
                       cardHolderName: cardHolderName,
+                      cardNamesConfigs: cardNamesConfigs,
+                      isCardNameInvalid: isCardNameInvalid,
+                      height: mediaQueryData.size.height / 4.3,
+                      width: mediaQueryData.size.height / 2.5,
+                      cardMargin: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 10, horizontal: mediaQueryData.size.width / 20),
+                      cardPadding: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 45, horizontal: mediaQueryData.size.width / 20),
                       cvvCode: cvvCode,
                       showBackView: isCvvFocused,
-                      height: 150,
-                      width: 250,
-                      cardMargin: const EdgeInsets.all(0),
-                      frontFontColor: Colors.grey[700],
+                      frontFontColor: Colors.white,
                       backFontColor: Colors.grey[700],
+                      fontSizeFactor: 38,
                       cardBorder: Border(
                         bottom: BorderSide(color: Colors.grey[400], width: 1),
                         top: BorderSide(color: Colors.grey[400], width: 1),
                         left: BorderSide(color: Colors.grey[400], width: 1),
                         right: BorderSide(color: Colors.grey[400], width: 1),
                       ),
-                      backgroundGradientColor: const LinearGradient(
+                      backgroundGradientColorNoCardName: const LinearGradient(
                         // Where the linear gradient begins and ends
                         begin: Alignment.bottomRight,
                         end: Alignment.topLeft,
@@ -129,7 +184,7 @@ class MyAppState extends State<MyApp> {
                         validCardNames.add(Container(
                           height: constraints.biggest.height / 20,
                           child: Text(
-                            'Bandeiras válidas:',
+                            'Bandeiras válidas: ',
                             style: TextStyle(
                               color: Colors.red[800],
                               fontWeight: FontWeight.w900,
@@ -146,6 +201,9 @@ class MyAppState extends State<MyApp> {
                         validCardNames: validCardNamesText,
                         cardName: cardName,
                         constraints: constraints,
+                        fontSizeFactor: 14,
+                        textFieldsContentPadding: EdgeInsets.symmetric(vertical: constraints.biggest.height / 71 * 6.5, horizontal: constraints.biggest.width / 360 * 8),
+                        creditCardFormScrollController: creditCardFormScrollController,
                         invalidCardNameWidget: isCardNameInvalid ? Container(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,6 +225,61 @@ class MyAppState extends State<MyApp> {
                             ],
                           ),
                         ) : null,
+                        invalidCardNumberWidget: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Número inválido!',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        invalidExpiryDateWidget: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Data inválida.',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        expiredDateWidget: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Cartão vencido.',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        invalidCpfWidget: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'CPF inválido.',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        invalidCnpjWidget: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'CNPJ inválido.',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: constraints.biggest.height / 280 * 12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
                         onCreditCardModelChange: onCreditCardModelChange,
                       );
                     }
@@ -187,6 +300,7 @@ class MyAppState extends State<MyApp> {
       cardHolderName = creditCardModel.cardHolderName;
       cvvCode = creditCardModel.cvvCode;
       isCvvFocused = creditCardModel.isCvvFocused;
+      isCardNumberInvalid = creditCardModel.isCardNumberInvalid;
     });
   }
 }

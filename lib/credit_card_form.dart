@@ -1,9 +1,166 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
 import 'package:flutter_credit_card_brazilian/credit_card_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'credit_card_model.dart';
 import 'flutter_credit_card.dart';
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text?.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
+
+bool validaCpfCnpj(String val) {
+  if (val.length == 14) {
+    String cpf = val.trim();
+  
+    cpf = cpf.replaceAll(RegExp(r'\D'), '');
+    final List<String> cpfSplitted = cpf.split('');
+    
+    int v1 = 0;
+    int v2 = 0;
+    bool aux = false;
+    
+    for (int i = 1; cpfSplitted.length > i; i++) {
+      if (cpfSplitted[i - 1] != cpf[i]) {
+        aux = true;   
+      }
+    } 
+    
+    if (aux == false) {
+      return false; 
+    } 
+    
+    for (int i = 0, p = 10; (cpfSplitted.length - 2) > i; i++, p--) {
+      v1 += int.parse(cpfSplitted[i]) * p; 
+    } 
+    
+    v1 = v1 * 10 % 11;
+    
+    if (v1 == 10) {
+      v1 = 0; 
+    }
+    
+    if (v1 != int.parse(cpfSplitted[9])) {
+      return false; 
+    } 
+    
+    for (int i = 0, p = 11; (cpfSplitted.length - 1) > i; i++, p--) {
+      v2 += int.parse(cpfSplitted[i]) * p; 
+    } 
+    
+    v2 = v2 * 10 % 11;
+    
+    if (v2 == 10) {
+      v2 = 0; 
+    }
+    
+    if (v2 != int.parse(cpfSplitted[10])) {
+      return false; 
+    } else {   
+      return true; 
+    }
+  } else if (val.length == 18) {
+    String cnpj = val.trim();
+    
+    cnpj = cnpj.replaceAll(RegExp(r'\D'), ''); 
+    final List<String> cnpjSplitted = cnpj.split(''); 
+    
+    int v1 = 0;
+    int v2 = 0;
+    bool aux = false;
+    
+    for (int i = 1; cnpjSplitted.length > i; i++) { 
+      if (cnpjSplitted[i - 1] != cnpjSplitted[i]) {  
+        aux = true;   
+      } 
+    } 
+    
+    if (aux == false) {  
+      return false; 
+    }
+    
+    for (int i = 0, p1 = 5, p2 = 13; (cnpjSplitted.length - 2) > i; i++, p1--, p2--) {
+      if (p1 >= 2) {  
+        v1 += int.parse(cnpjSplitted[i]) * p1;  
+      } else {  
+        v1 += int.parse(cnpjSplitted[i]) * p2;  
+      } 
+    } 
+    
+    v1 = v1 % 11;
+    
+    if (v1 < 2) { 
+      v1 = 0; 
+    } else { 
+      v1 = 11 - v1; 
+    } 
+    
+    if (v1 != int.parse(cnpjSplitted[12])) {  
+      return false; 
+    } 
+    
+    for (int i = 0, p1 = 6, p2 = 14; (cnpjSplitted.length - 1) > i; i++, p1--, p2--) { 
+      if (p1 >= 2) {  
+        v2 += int.parse(cnpjSplitted[i]) * p1;  
+      } else {   
+        v2 += int.parse(cnpjSplitted[i]) * p2; 
+      } 
+    }
+    
+    v2 = v2 % 11; 
+    
+    if (v2 < 2) {  
+      v2 = 0;
+    } else { 
+      v2 = 11 - v2; 
+    } 
+    
+    if (v2 != int.parse(cnpjSplitted[13])) {   
+      return false; 
+    } else {  
+      return true; 
+    }
+  } else {
+    return false;
+  }
+ }
+
+/// TextInputFormatter that fixes the regression.
+/// https://github.com/flutter/flutter/issues/67236
+///
+/// Remove it once the issue above is fixed.
+class LengthLimitingTextFieldFormatterFixed
+    extends LengthLimitingTextInputFormatter {
+  LengthLimitingTextFieldFormatterFixed(int maxLength) : super(maxLength);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (maxLength != null &&
+        maxLength > 0 &&
+        newValue.text.characters.length > maxLength) {
+      // If already at the maximum and tried to enter even more, keep the old
+      // value.
+      if (oldValue.text.characters.length == maxLength) {
+        return oldValue;
+      }
+      // ignore: invalid_use_of_visible_for_testing_member
+      return LengthLimitingTextInputFormatter.truncate(newValue, maxLength);
+    }
+    return newValue;
+  }
+}
 
 class CreditCardForm extends StatefulWidget {
   const CreditCardForm({
@@ -12,6 +169,7 @@ class CreditCardForm extends StatefulWidget {
     this.cardName,
     this.expiryDate,
     this.cardHolderName,
+    this.cpfCnpj,
     this.cvvCode,
     this.height,
     this.width,
@@ -23,6 +181,14 @@ class CreditCardForm extends StatefulWidget {
     this.localizedText = const LocalizedText(),
     this.validCardNames,
     this.invalidCardNameWidget,
+    this.invalidCardNumberWidget,
+    this.invalidExpiryDateWidget,
+    this.expiredDateWidget,
+    this.invalidCpfWidget,
+    this.invalidCnpjWidget,
+    this.creditCardFormScrollController,
+    this.fontSizeFactor = 17,
+    this.textFieldsContentPadding,
   })  : assert(localizedText != null),
         super(key: key);
 
@@ -30,6 +196,7 @@ class CreditCardForm extends StatefulWidget {
   final String cardName;
   final String expiryDate;
   final String cardHolderName;
+  final String cpfCnpj;
   final String cvvCode;
   final double height;
   final double width;
@@ -41,6 +208,14 @@ class CreditCardForm extends StatefulWidget {
   final LocalizedText localizedText;
   final List<String> validCardNames;
   final Widget invalidCardNameWidget;
+  final Widget invalidCardNumberWidget;
+  final Widget invalidExpiryDateWidget;
+  final Widget expiredDateWidget;
+  final Widget invalidCpfWidget;
+  final Widget invalidCnpjWidget;
+  final ScrollController creditCardFormScrollController;
+  final int fontSizeFactor;
+  final EdgeInsetsGeometry textFieldsContentPadding;
 
   @override
   _CreditCardFormState createState() => _CreditCardFormState();
@@ -51,24 +226,58 @@ class _CreditCardFormState extends State<CreditCardForm> {
   String cardName;
   String expiryDate;
   String cardHolderName;
+  String cpfCnpj;
   String cvvCode;
   bool isCvvFocused = false;
   Color themeColor;
   TextStyle textStyle;
+  bool isCardNumberInvalid = false;
+  bool isExpiryDateInvalid = false;
+  bool isDateExpired = false;
+  LocalizedText localizedText;
+  Map<String, dynamic> cardInfos;
+  DateTime expiryDateTime;
 
   void Function(CreditCardModel) onCreditCardModelChange;
   CreditCardModel creditCardModel;
 
   final MaskedTextController _cardNumberController =
       MaskedTextController(mask: '0000 0000 0000 0000');
-  final TextEditingController _expiryDateController =
+  final MaskedTextController _cpfCnpjController =
+      MaskedTextController(mask: '000.000.000-00', maxLength: 18);
+  final MaskedTextController _expiryDateController =
       MaskedTextController(mask: '00/00');
   final TextEditingController _cardHolderNameController =
       TextEditingController();
-  final TextEditingController _cvvCodeController =
-      MaskedTextController(mask: '0000');
+  final MaskedTextController _cvvCodeController =
+      MaskedTextController(mask: '000');
 
   FocusNode cvvFocusNode = FocusNode();
+
+  bool checkLuhn(String value) {
+    final int qtdDigits = CreditCardWidgetState.detectCCType(cardNumber)['mask'].replaceAll(' ', '').length;
+    // remove all non digit characters
+    value = value.replaceAll(RegExp(r'\D'), '');
+    
+    if (value.length < qtdDigits)
+      return true;
+
+    int sum = 0;
+    bool shouldDouble = false;
+    // loop through values starting at the rightmost side
+    for (int i = value.length - 1; i >= 0; i--) {
+      int digit = int.tryParse(value[i]);
+      
+      if (shouldDouble) {
+        if ((digit *= 2) > 9)
+          digit -= 9;
+      }
+
+      sum += digit;
+      shouldDouble = !shouldDouble;
+    }
+    return (sum % 10) == 0;
+  }
 
   void textFieldFocusDidChange() {
     creditCardModel.isCvvFocused = cvvFocusNode.hasFocus;
@@ -80,27 +289,78 @@ class _CreditCardFormState extends State<CreditCardForm> {
     cardName = widget.cardName ?? '';
     expiryDate = widget.expiryDate ?? '';
     cardHolderName = widget.cardHolderName ?? '';
+    cpfCnpj = widget.cpfCnpj ?? '';
     cvvCode = widget.cvvCode ?? '';
 
     creditCardModel = CreditCardModel(cardNumber, cardName, expiryDate,
-        cardHolderName, cvvCode, isCvvFocused);
+        cardHolderName, cvvCode, cpfCnpj, isCvvFocused, !checkLuhn(cardNumber), !validaCpfCnpj(cpfCnpj));
+
+    _cardNumberController.text = cardNumber;
+    _expiryDateController.text = expiryDate;
+    _cardHolderNameController.text = cardHolderName;
+    _cvvCodeController.text = cvvCode;
+  }
+
+  void updateCardNumberMasks() {
+    cardInfos = CreditCardWidgetState.detectCCType(cardNumber);
+    _cardNumberController.updateMask(cardInfos['mask']);
+
+    if (cardInfos['type'] == CardType.americanExpress) {
+      _cvvCodeController.updateMask('0000');
+      localizedText = LocalizedText(
+        cardHolderHint: localizedText.cardHolderHint,
+        cardHolderLabel: localizedText.cardHolderLabel,
+        cardNumberHint: cardInfos['hint'],
+        cardNumberLabel: localizedText.cardNumberLabel,
+        cvvHint: '****',
+        cvvLabel: localizedText.cvvLabel,
+        expiryDateHint: localizedText.expiryDateHint,
+        expiryDateLabel: localizedText.expiryDateLabel,
+      );
+    }
+    else {
+      _cvvCodeController.updateMask('000');
+      localizedText = LocalizedText(
+        cardHolderHint: localizedText.cardHolderHint,
+        cardHolderLabel: localizedText.cardHolderLabel,
+        cardNumberHint: cardInfos['hint'],
+        cardNumberLabel: localizedText.cardNumberLabel,
+        cvvHint: '***',
+        cvvLabel: localizedText.cvvLabel,
+        expiryDateHint: localizedText.expiryDateHint,
+        expiryDateLabel: localizedText.expiryDateLabel,
+      );
+    }
+  }
+
+  void updateCpfCnpjMasks() {
+    if (_cpfCnpjController.text.replaceAll(RegExp(r'\D'), '').length <= 11)
+      _cpfCnpjController.updateMask('000.000.000-00');
+    else
+      _cpfCnpjController.updateMask('00.000.000/0000-00');
   }
 
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('pt_BR');
 
     createCreditCardModel();
+    localizedText = widget.localizedText;
 
     onCreditCardModelChange = widget.onCreditCardModelChange;
 
     cvvFocusNode.addListener(textFieldFocusDidChange);
+    updateCardNumberMasks();
 
     _cardNumberController.addListener(() {
+      updateCardNumberMasks();
+        
       setState(() {
         cardNumber = _cardNumberController.text;
         creditCardModel.cardName = cardName;
         creditCardModel.cardNumber = cardNumber;
+        creditCardModel.isCardNumberInvalid = !checkLuhn(cardNumber);
         onCreditCardModelChange(creditCardModel);
       });
     });
@@ -109,6 +369,15 @@ class _CreditCardFormState extends State<CreditCardForm> {
       setState(() {
         expiryDate = _expiryDateController.text;
         creditCardModel.expiryDate = expiryDate;
+
+        try {
+          expiryDateTime = DateFormat('MM/yy', 'pt_BR').parseStrict(expiryDate);
+        } catch (e) {
+          expiryDateTime = null;
+        }
+        creditCardModel.isExpiryDateInvalid = expiryDate.isNotEmpty && expiryDate.length == 5 && expiryDateTime == null;
+        creditCardModel.isDateExpired = expiryDate.isNotEmpty && !creditCardModel.isExpiryDateInvalid && expiryDate.length == 5 && expiryDateTime.year < DateFormat('MM/yy', 'pt_BR').parseStrict(DateFormat('MM/yy', 'pt_BR').format(DateTime.now())).year;
+
         onCreditCardModelChange(creditCardModel);
       });
     });
@@ -128,6 +397,17 @@ class _CreditCardFormState extends State<CreditCardForm> {
         onCreditCardModelChange(creditCardModel);
       });
     });
+
+    _cpfCnpjController.addListener(() {
+      updateCpfCnpjMasks();
+
+      setState(() {
+        cpfCnpj = _cpfCnpjController.text;
+        creditCardModel.cpfCnpj = cpfCnpj;
+        creditCardModel.isCpfCnpjInvalid = !validaCpfCnpj(cpfCnpj);
+        onCreditCardModelChange(creditCardModel);
+      });
+    });
   }
 
   @override
@@ -142,6 +422,11 @@ class _CreditCardFormState extends State<CreditCardForm> {
     const double widthFactor = 360;
     final double firstHeight = widget.height == null && widget.constraints != null && widget.constraints.biggest != null ? widget.constraints.biggest.height : widget.height;
     final double firstWidth = widget.width == null && widget.constraints != null && widget.constraints.biggest != null ? widget.constraints.biggest.width : widget.width;
+    final double height = firstHeight / 5;
+    textStyle = TextStyle(
+      color: Colors.black,
+      fontSize: height / heightFactor * widget.fontSizeFactor,
+    );
 
     return Theme(
       data: ThemeData(
@@ -152,163 +437,206 @@ class _CreditCardFormState extends State<CreditCardForm> {
         height: firstHeight,
         width: firstWidth,
         child: Form(
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (BuildContext contextLayout, BoxConstraints constraints) {
-                    final double height = constraints.biggest.height;
-                    final double width = constraints.biggest.width;
-                    textStyle = TextStyle(
-                      color: Colors.black,
-                      fontSize: height / heightFactor * 14,
-                    );
-                    return Container(
-                      padding: EdgeInsets.symmetric(vertical: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8)),
-                      margin: EdgeInsets.symmetric(horizontal: width / widthFactor * 16, vertical: height / heightFactor * 4),
-                      alignment: Alignment.centerLeft,
-                      child: TextFormField(
-                        expands: true,
-                        maxLines: null,
-                        minLines: null,
-                        controller: _cardNumberController,
-                        cursorColor: widget.cursorColor ?? themeColor,
-                        style: textStyle,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: width / widthFactor * 8),
-                          border: const OutlineInputBorder(),
-                          labelText: widget.localizedText.cardNumberLabel,
-                          hintText: widget.localizedText.cardNumberHint,
-                          errorStyle: const TextStyle(fontSize: 0, height: 0),
-                          alignLabelWithHint: true,
-                          isDense: true,
-                        ),
-                        textAlignVertical: TextAlignVertical.center,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        autovalidateMode: AutovalidateMode.always,
-                        validator: (String value) {
-                          return widget.invalidCardNameWidget != null ? '' : null;
-                        },
-                      ),
-                    );
-                  }
+          child: SingleChildScrollView(
+            controller: widget.creditCardFormScrollController,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: height / heightFactor * 2),
+                  alignment: Alignment.centerLeft,
+                  child: TextFormField(
+                    maxLines: 1,
+                    onChanged: checkLuhn,
+                    controller: _cardNumberController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cardNumberLabel,
+                      hintText: localizedText.cardNumberHint,
+                      errorStyle: const TextStyle(fontSize: 0, height: 0),
+                      alignLabelWithHint: true,
+                      isDense: true,
+                    ),
+                    textAlignVertical: TextAlignVertical.center,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    autovalidateMode: AutovalidateMode.always,
+                    validator: (String value) {
+                      return widget.invalidCardNameWidget != null || !checkLuhn(cardNumber) ? '' : null;
+                    },
+                  ),
                 ),
-              ),
-              widget.invalidCardNameWidget != null ? Container(
-                height: widget.height != null ? firstHeight / 7 : null,
-                width: widget.width != null ? firstWidth : null,
-                margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
-                child: widget.invalidCardNameWidget
-              ) : Container(),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (BuildContext contextLayout, BoxConstraints constraints) {
-                    final double height = constraints.biggest.height;
-                    final double width = constraints.biggest.width;
-                    textStyle = TextStyle(
-                      color: Colors.black,
-                      fontSize: height / heightFactor * 14,
-                    );
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8)),
-                            margin: EdgeInsets.only(right: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8) + height / heightFactor * 4, left: width / widthFactor * 16, bottom: height / heightFactor * 4, top: height / heightFactor * 4),
-                            child: TextFormField(
-                              expands: true,
-                              maxLines: null,
-                              minLines: null,
-                              controller: _expiryDateController,
-                              cursorColor: widget.cursorColor ?? themeColor,
-                              style: textStyle,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: width / widthFactor * 8),
-                                border: const OutlineInputBorder(),
-                                labelText: widget.localizedText.expiryDateLabel,
-                                hintText: widget.localizedText.expiryDateHint,
-                                alignLabelWithHint: true,
-                                isDense: true,
-                              ),
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.next,
+                !checkLuhn(cardNumber) && widget.invalidCardNumberWidget != null ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: widget.invalidCardNumberWidget,
+                ) : Container(),
+                widget.invalidCardNameWidget != null ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: widget.invalidCardNameWidget,
+                ) : Container(),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4, left: firstWidth / widthFactor * 16),
+                          child: TextFormField(
+                            maxLines: 1,
+                            controller: _expiryDateController,
+                            cursorColor: widget.cursorColor ?? themeColor,
+                            style: textStyle,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              contentPadding: widget.textFieldsContentPadding,
+                              border: const OutlineInputBorder(),
+                              labelText: localizedText.expiryDateLabel,
+                              hintText: localizedText.expiryDateHint,
+                              errorStyle: const TextStyle(fontSize: 0, height: 0),
+                              alignLabelWithHint: true,
+                              isDense: true,
                             ),
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            autovalidateMode: AutovalidateMode.always,
+                            validator: (String value) {
+                              return creditCardModel.isExpiryDateInvalid || creditCardModel.isDateExpired ? '' : null;
+                            },
                           ),
                         ),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8)),
-                            margin: EdgeInsets.only(right: width / widthFactor * 16, left: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8) + height / heightFactor * 4, bottom: height / heightFactor * 4, top: height / heightFactor * 4),
-                            child: TextField(
-                              expands: true,
-                              maxLines: null,
-                              minLines: null,
-                              focusNode: cvvFocusNode,
-                              controller: _cvvCodeController,
-                              cursorColor: widget.cursorColor ?? themeColor,
-                              style: textStyle,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: width / widthFactor * 8),
-                                border: const OutlineInputBorder(),
-                                labelText: widget.localizedText.cvvLabel,
-                                hintText: widget.localizedText.cvvHint,
-                                alignLabelWithHint: true,
-                                isDense: true,
-                              ),
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.done,
-                              onChanged: (String text) {
-                                setState(() {
-                                  cvvCode = text;
-                                });
-                              },
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: firstWidth / widthFactor * 16, left: height / heightFactor * 4),
+                          child: TextField(
+                            maxLines: 1,
+                            focusNode: cvvFocusNode,
+                            controller: _cvvCodeController,
+                            cursorColor: widget.cursorColor ?? themeColor,
+                            style: textStyle,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              contentPadding: widget.textFieldsContentPadding,
+                              border: const OutlineInputBorder(),
+                              labelText: localizedText.cvvLabel,
+                              hintText: localizedText.cvvHint,
+                              alignLabelWithHint: true,
+                              isDense: true,
                             ),
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            onChanged: (String text) {
+                              setState(() {
+                                cvvCode = text;
+                              });
+                            },
                           ),
                         ),
-                      ],
-                    );
-                  }
-                ),
-              ),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (BuildContext contextLayout, BoxConstraints constraints) {
-                    final double height = constraints.biggest.height;
-                    final double width = constraints.biggest.width;
-                    textStyle = TextStyle(
-                      color: Colors.black,
-                      fontSize: height / heightFactor * 14,
-                    );
-                    return Container(
-                      padding: EdgeInsets.symmetric(vertical: height / heightFactor * (widget.invalidCardNameWidget != null ? 2 : 8)),
-                      margin: EdgeInsets.symmetric(horizontal: width / widthFactor * 16, vertical: height / heightFactor * 4),
-                      child: TextFormField(
-                        expands: true,
-                        maxLines: null,
-                        minLines: null,
-                        controller: _cardHolderNameController,
-                        cursorColor: widget.cursorColor ?? themeColor,
-                        style: textStyle,
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: width / widthFactor * 8),
-                          border: const OutlineInputBorder(),
-                          labelText: widget.localizedText.cardHolderLabel,
-                          hintText: widget.localizedText.cardHolderHint,
-                          alignLabelWithHint: true,
-                          isDense: true,
-                        ),
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
                       ),
-                    );
-                  }
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                creditCardModel.isExpiryDateInvalid ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4),
+                          child: widget.invalidExpiryDateWidget
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: height / heightFactor * 4),
+                          child: Container(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) : creditCardModel.isDateExpired ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4),
+                          child: widget.expiredDateWidget,
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: height / heightFactor * 4),
+                          child: Container(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) : Container(),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2, horizontal: firstWidth / widthFactor * 16),
+                  child: TextFormField(
+                    maxLines: 1,
+                    controller: _cardHolderNameController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cardHolderLabel,
+                      hintText: localizedText.cardHolderHint,
+                      alignLabelWithHint: true,
+                      isDense: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[LengthLimitingTextFieldFormatterFixed(20), UpperCaseTextFormatter()],
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2, horizontal: firstWidth / widthFactor * 16),
+                  child: TextFormField(
+                    maxLines: 1,
+                    controller: _cpfCnpjController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cpfCnpjLabelDefault,
+                      hintText: localizedText.cardHolderHint,
+                      errorStyle: const TextStyle(fontSize: 0, height: 0),
+                      alignLabelWithHint: true,
+                      isDense: true,
+                    ),
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    autovalidateMode: AutovalidateMode.always,
+                    validator: (String value) {
+                      return !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel.cpfCnpj.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel.cpfCnpj.replaceAll(RegExp(r'\D'), '').length == 14) ? '' : null;
+                    },
+                  ),
+                ),
+                creditCardModel.isCpfCnpjInvalid && (creditCardModel.cpfCnpj.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel.cpfCnpj.replaceAll(RegExp(r'\D'), '').length == 14) ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: creditCardModel.cpfCnpj.replaceAll(RegExp(r'\D'), '').length <= 11 ? 
+                    widget.invalidCpfWidget : widget.invalidCnpjWidget,
+                ) : Container(),
+              ],
+            ),
           ),
         ),
       ),

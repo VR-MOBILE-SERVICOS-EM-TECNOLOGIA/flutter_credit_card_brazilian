@@ -1,6 +1,6 @@
 name: flutter_credit_card_brazilian
 description: Componente para Cartão de Credito.
-version: 0.1.2
+version: 0.3.0
 author: José Barreto <jbarretosantosjr@gmail.com>
 homepage: https://github.com/JoseBarreto1/flutter_credit_card_brazilian
 issue_tracker : https://github.com/JoseBarreto1/flutter_credit_card_brazilian/issues
@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.16.1
+  auto_size_text: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -43,3 +45,8 @@ flutter:
     - family: halter
       fonts:
         - asset: font/halter.ttf
+    - family: RobotoMono
+      fonts:
+        - asset: font/RobotoMono-Regular.ttf
+        - asset: font/RobotoMono-Bold.ttf
+          weight: 700

@@ -74,3 +74,4 @@ ios/.generated/
 .idea/instapk.xml
 instapk.log*
 /pubspec.lock
+example/ios/Flutter/flutter_export_environment.sh

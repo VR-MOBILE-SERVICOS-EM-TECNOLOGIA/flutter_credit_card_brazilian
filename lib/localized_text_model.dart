@@ -8,16 +8,23 @@ class LocalizedText {
     this.cvvHint = _cvvHintDefault,
     this.cardHolderLabel = _cardHolderLabelDefault,
     this.cardHolderHint = _cardHolderHintDefault,
+    this.cpfCnpjLabelDefault = _cpfCnpjLabelDefault,
+    this.cpfHintDefault = _cpfHintDefault,
+    this.cnpjHintDefault = _cnpjHintDefault,
   });
 
   static const String _cardNumberLabelDefault = 'Número do cartão';
-  static const String _cardNumberHintDefault = 'XXXX XXXX XXXX XXXXX';
+  static const String _cardNumberHintDefault = '**** **** **** ****';
   static const String _expiryDateLabelDefault = 'Validade';
   static const String _expiryDateHintDefault = 'MM/YY';
   static const String _cvvLabelDefault = 'CVV';
-  static const String _cvvHintDefault = 'XXX';
-  static const String _cardHolderLabelDefault = 'Nome completo';
+  static const String _cvvHintDefault = '***';
+  static const String _cardHolderLabelDefault = 'Nome do titular';
   static const String _cardHolderHintDefault = '';
+  static const String _cpfCnpjLabelDefault = 'CPF/CNPJ';
+  static const String _cpfHintDefault = '*';
+  static const String _cnpjHintDefault = '*';
+  
 
   final String cardNumberLabel;
   final String cardNumberHint;
@@ -27,4 +34,7 @@ class LocalizedText {
   final String cvvHint;
   final String cardHolderLabel;
   final String cardHolderHint;
+  final String cpfCnpjLabelDefault;
+  final String cpfHintDefault;
+  final String cnpjHintDefault;
 }
