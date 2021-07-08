@@ -299,6 +299,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
     _expiryDateController.text = expiryDate;
     _cardHolderNameController.text = cardHolderName;
     _cvvCodeController.text = cvvCode;
+    _cpfCnpjController.text = cpfCnpj;
   }
 
   void updateCardNumberMasks() {
@@ -352,6 +353,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
 
     cvvFocusNode.addListener(textFieldFocusDidChange);
     updateCardNumberMasks();
+    updateCpfCnpjMasks();
 
     _cardNumberController.addListener(() {
       updateCardNumberMasks();
