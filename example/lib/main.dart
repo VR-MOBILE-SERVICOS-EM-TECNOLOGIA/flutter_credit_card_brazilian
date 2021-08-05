@@ -33,15 +33,15 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  String cardNumber = '';
-  String cardName = '';
-  String expiryDate = '';
-  String cardHolderName = '';
-  String cvvCode = '';
+  String? cardNumber = '';
+  String? cardName = '';
+  String? expiryDate = '';
+  String? cardHolderName = '';
+  String? cvvCode = '';
   bool isCvvFocused = false;
   bool isCardNameInvalid = false;
   bool isCardNumberInvalid = false;
-  MediaQueryData mediaQueryData;
+  late MediaQueryData mediaQueryData;
   List<Widget> validCardNames = <Widget>[];
   List<String> validCardNamesText = const <String>['VISA', 'MASTERCARD', 'HIPERCARD', 'ELO'];
 
@@ -53,13 +53,12 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
-    cardName = CreditCardWidgetState.getCardTypeName(cardNumber);
-    isCardNameInvalid = validCardNamesText != null && cardNumber.replaceAll(' ', '').length > 5 && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
+    cardName = CreditCardWidgetState.getCardTypeName(cardNumber!);
+    isCardNameInvalid = cardNumber!.replaceAll(' ', '').length > 5 && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
     final ScrollController creditCardFormScrollController = ScrollController();
     final List<CardNameConfig> cardNamesConfigs = <CardNameConfig>[
       const CardNameConfig(
         name: 'ELO',
-        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -72,7 +71,6 @@ class MyAppState extends State<MyApp> {
       ),
       const CardNameConfig(
         name: 'VISA',
-        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -85,7 +83,6 @@ class MyAppState extends State<MyApp> {
       ),
       const CardNameConfig(
         name: 'MASTERCARD',
-        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -98,7 +95,6 @@ class MyAppState extends State<MyApp> {
       ),
       const CardNameConfig(
         name: 'HIPERCARD',
-        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -121,25 +117,25 @@ class MyAppState extends State<MyApp> {
                 Expanded(
                   child: Container(
                     child: CreditCardWidget(
-                      cardNumber: cardNumber,
-                      expiryDate: expiryDate,
-                      cardHolderName: cardHolderName,
+                      cardNumber: cardNumber!,
+                      expiryDate: expiryDate!,
+                      cardHolderName: cardHolderName!,
                       cardNamesConfigs: cardNamesConfigs,
                       isCardNameInvalid: isCardNameInvalid,
                       height: mediaQueryData.size.height / 4.3,
                       width: mediaQueryData.size.height / 2.5,
                       cardMargin: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 10, horizontal: mediaQueryData.size.width / 20),
-                      cardPadding: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 45, horizontal: mediaQueryData.size.width / 20),
-                      cvvCode: cvvCode,
+                      cardPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                      cvvCode: cvvCode!,
                       showBackView: isCvvFocused,
                       frontFontColor: Colors.white,
-                      backFontColor: Colors.grey[700],
-                      fontSizeFactor: 38,
+                      backFontColor: Colors.grey[700]!,
+                      fontSizeFactor: 32,
                       cardBorder: Border(
-                        bottom: BorderSide(color: Colors.grey[400], width: 1),
-                        top: BorderSide(color: Colors.grey[400], width: 1),
-                        left: BorderSide(color: Colors.grey[400], width: 1),
-                        right: BorderSide(color: Colors.grey[400], width: 1),
+                        bottom: BorderSide(color: Colors.grey[400]!, width: 1),
+                        top: BorderSide(color: Colors.grey[400]!, width: 1),
+                        left: BorderSide(color: Colors.grey[400]!, width: 1),
+                        right: BorderSide(color: Colors.grey[400]!, width: 1),
                       ),
                       backgroundGradientColorNoCardName: const LinearGradient(
                         // Where the linear gradient begins and ends
@@ -171,7 +167,7 @@ class MyAppState extends State<MyApp> {
                             ' ' + cardName + (validCardNamesText.last == cardName ? '' : ', '),
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -188,7 +184,7 @@ class MyAppState extends State<MyApp> {
                             style: TextStyle(
                               color: Colors.red[800],
                               fontWeight: FontWeight.w900,
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -201,6 +197,7 @@ class MyAppState extends State<MyApp> {
                         validCardNames: validCardNamesText,
                         cardName: cardName,
                         constraints: constraints,
+                        height: 500,
                         fontSizeFactor: 14,
                         textFieldsContentPadding: EdgeInsets.symmetric(vertical: constraints.biggest.height / 71 * 6.5, horizontal: constraints.biggest.width / 360 * 8),
                         creditCardFormScrollController: creditCardFormScrollController,
@@ -214,7 +211,7 @@ class MyAppState extends State<MyApp> {
                                   'O estabelecimento não aceita essa bandeira para pagamento online.',
                                   style: TextStyle(
                                     color: Colors.red[800],
-                                    fontSize: constraints.biggest.height / 280 * 12,
+                                    fontSize: constraints.biggest.height / 340 * 12,
                                   ),
                                   textAlign: TextAlign.left,
                                 ),
@@ -231,7 +228,7 @@ class MyAppState extends State<MyApp> {
                             'Número inválido!',
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -242,7 +239,7 @@ class MyAppState extends State<MyApp> {
                             'Data inválida.',
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -253,7 +250,7 @@ class MyAppState extends State<MyApp> {
                             'Cartão vencido.',
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -264,7 +261,7 @@ class MyAppState extends State<MyApp> {
                             'CPF inválido.',
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -275,7 +272,7 @@ class MyAppState extends State<MyApp> {
                             'CNPJ inválido.',
                             style: TextStyle(
                               color: Colors.red[800],
-                              fontSize: constraints.biggest.height / 280 * 12,
+                              fontSize: constraints.biggest.height / 340 * 12,
                             ),
                             textAlign: TextAlign.left,
                           ),
@@ -293,9 +290,9 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  void onCreditCardModelChange(CreditCardModel creditCardModel) {
+  void onCreditCardModelChange(CreditCardModel? creditCardModel) {
     setState(() {
-      cardNumber = creditCardModel.cardNumber;
+      cardNumber = creditCardModel!.cardNumber;
       expiryDate = creditCardModel.expiryDate;
       cardHolderName = creditCardModel.cardHolderName;
       cvvCode = creditCardModel.cvvCode;
