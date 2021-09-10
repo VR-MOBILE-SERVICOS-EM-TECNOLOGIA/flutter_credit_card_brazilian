@@ -38,6 +38,7 @@ class MyAppState extends State<MyApp> {
   String? expiryDate = '';
   String? cardHolderName = '';
   String? cvvCode = '';
+  String? cpfCnpj = '';
   bool isCvvFocused = false;
   bool isCardNameInvalid = false;
   bool isCardNumberInvalid = false;
@@ -196,6 +197,11 @@ class MyAppState extends State<MyApp> {
                       return CreditCardForm(
                         validCardNames: validCardNamesText,
                         cardName: cardName,
+                        cardHolderName: cardHolderName,
+                        cardNumber: cardNumber,
+                        cvvCode: cvvCode,
+                        expiryDate: expiryDate,
+                        cpfCnpj: cpfCnpj,
                         constraints: constraints,
                         height: 500,
                         fontSizeFactor: 14,
@@ -298,6 +304,7 @@ class MyAppState extends State<MyApp> {
       cvvCode = creditCardModel.cvvCode;
       isCvvFocused = creditCardModel.isCvvFocused;
       isCardNumberInvalid = creditCardModel.isCardNumberInvalid;
+      cpfCnpj = creditCardModel.cpfCnpj;
     });
   }
 }

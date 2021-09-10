@@ -1057,27 +1057,19 @@ class MaskedTextController extends TextEditingController {
     _lastUpdatedText = this.text;
   }
 
-  void updateMask(String? mask, {bool moveCursorToEnd = true}) {
+  void updateMask(String? mask) {
     this.mask = mask;
     updateText(text);
-
-    if (moveCursorToEnd) {
-      this.moveCursorToEnd();
-    }
-  }
-
-  void moveCursorToEnd() {
-    final String text = _lastUpdatedText;
-    selection =
-        TextSelection.fromPosition(TextPosition(offset: text.length));
   }
 
   @override
   set text(String? newText) {
-    if (super.text != newText) {
-      super.text = newText!;
-      moveCursorToEnd();
-    }
+    if (super.text != newText)
+      value = value.copyWith(
+        text: newText,
+        selection: TextSelection.fromPosition(TextPosition(offset: newText!.length)),
+        composing: TextRange.empty,
+      );
   }
 
   static Map<String, RegExp> getDefaultTranslator() {
