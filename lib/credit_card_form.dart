@@ -242,7 +242,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
   final MaskedTextController _cpfCnpjController =
       MaskedTextController(mask: '000.000.000-00', maxLength: 18);
   final MaskedTextController _expiryDateController =
-      MaskedTextController(mask: '00/0000');
+      MaskedTextController(mask: '00/00');
   final TextEditingController _cardHolderNameController =
       TextEditingController();
   final MaskedTextController _cvvCodeController =
@@ -289,7 +289,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
     cvvCode = widget.cvvCode ?? '';
 
     creditCardModel = CreditCardModel(cardNumber, cardName, expiryDate,
-        cardHolderName, cvvCode, cpfCnpj, isCvvFocused, !checkLuhn(cardNumber!), !validaCpfCnpj(cpfCnpj!));
+        cardHolderName, cpfCnpj, cvvCode, isCvvFocused, !checkLuhn(cardNumber!), !validaCpfCnpj(cpfCnpj!));
 
     _cardNumberController.text = cardNumber;
     _expiryDateController.text = expiryDate;
@@ -369,12 +369,12 @@ class _CreditCardFormState extends State<CreditCardForm> {
         creditCardModel!.expiryDate = expiryDate;
 
         try {
-          expiryDateTime = DateFormat('MM/yyyy', 'pt_BR').parseStrict(expiryDate!);
+          expiryDateTime = DateFormat('MM/y', 'pt_BR').parseStrict(expiryDate!);
         } catch (e) {
           expiryDateTime = null;
         }
-        creditCardModel!.isExpiryDateInvalid = expiryDate!.isNotEmpty && expiryDate!.length == 7 && expiryDateTime == null;
-        creditCardModel!.isDateExpired = expiryDate!.isNotEmpty && !creditCardModel!.isExpiryDateInvalid && expiryDate!.length == 7 && expiryDateTime!.year < DateFormat('MM/yyyy', 'pt_BR').parseStrict(DateFormat('MM/yyyy', 'pt_BR').format(DateTime.now())).year;
+        creditCardModel!.isExpiryDateInvalid = expiryDate!.isNotEmpty && expiryDate!.length == 5 && expiryDateTime == null;
+        creditCardModel!.isDateExpired = expiryDate!.isNotEmpty && !creditCardModel!.isExpiryDateInvalid && expiryDate!.length == 5 && expiryDateTime!.year < int.parse(DateFormat('MM/y', 'pt_BR').format(DateTime.now()).substring(5));
 
         onCreditCardModelChange(creditCardModel);
       });

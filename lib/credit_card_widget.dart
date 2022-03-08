@@ -90,13 +90,7 @@ class CreditCardWidget extends StatefulWidget {
         Color(0xff84a2cb),
       ],
     ),
-    this.cardShadow = const <BoxShadow>[
-      BoxShadow(
-        color: Colors.black26,
-        offset: Offset(0, 0),
-        blurRadius: 24,
-      ),
-    ],
+    this.cardShadow,
     this.cardBorder = const Border(),
     this.localizedText = const LocalizedText(),
     this.isCardNameInvalid = false,
@@ -118,7 +112,7 @@ class CreditCardWidget extends StatefulWidget {
   final Function(String?)? cardName;
   final LinearGradient backgroundGradientColor;
   final LinearGradient backgroundGradientColorNoCardName;
-  final List<BoxShadow> cardShadow;
+  final List<BoxShadow>? cardShadow;
   final BoxBorder cardBorder;
   final Color frontFontColor;
   final Color backFontColor;
@@ -542,7 +536,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
                             child: Text(
                               widget.expiryDate.isEmpty ?
                                 localizedText.expiryDateHint :
-                                localizedText.expiryDateHint.replaceRange(0, widget.expiryDate.length, widget.expiryDate),
+                                localizedText.expiryDateHint.replaceRange(0, localizedText.expiryDateHint.length, widget.expiryDate),
                               style: widget.textStyle ?? dateTextStyle,
                               maxLines: 1,
                             ),

@@ -16,7 +16,7 @@ class LocalizedText {
   static const String _cardNumberLabelDefault = 'Número do cartão';
   static const String _cardNumberHintDefault = '**** **** **** ****';
   static const String _expiryDateLabelDefault = 'Validade';
-  static const String _expiryDateHintDefault = 'MM/YYYY';
+  static const String _expiryDateHintDefault = 'MM/AA';
   static const String _cvvLabelDefault = 'CVV';
   static const String _cvvHintDefault = '***';
   static const String _cardHolderLabelDefault = 'Nome do titular';
