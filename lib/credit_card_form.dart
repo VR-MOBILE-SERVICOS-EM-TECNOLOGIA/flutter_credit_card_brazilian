@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'flutter_credit_card.dart';
 
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
