@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'flutter_credit_card.dart';
 
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
@@ -435,7 +434,223 @@ class _CreditCardFormState extends State<CreditCardForm> {
         height: firstHeight,
         width: firstWidth,
         child: Form(
-          child: SingleChildScrollView(
+          child: widget.creditCardFormScrollController == null ? Column(
+              children: <Widget>[
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: height / heightFactor * 2),
+                  alignment: Alignment.centerLeft,
+                  child: TextFormField(
+                    maxLines: 1,
+                    onChanged: checkLuhn,
+                    controller: _cardNumberController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cardNumberLabel,
+                      hintText: localizedText.cardNumberHint,
+                      alignLabelWithHint: true,
+                      labelStyle: widget.invalidCardNameWidget != null || !checkLuhn(cardNumber!) ? TextStyle(color: Colors.red[800]!) : null,
+                      enabledBorder: widget.invalidCardNameWidget != null || !checkLuhn(cardNumber!) ? OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red[800]!
+                        ),
+                      ) : null,
+                      focusedBorder: widget.invalidCardNameWidget != null || !checkLuhn(cardNumber!) ? OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red[800]!
+                        ),
+                      ) : null,
+                      isDense: true,
+                    ),
+                    textAlignVertical: TextAlignVertical.center,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                !checkLuhn(cardNumber!) && widget.invalidCardNumberWidget != null ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: widget.invalidCardNumberWidget,
+                ) : Container(),
+                widget.invalidCardNameWidget != null ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: widget.invalidCardNameWidget,
+                ) : Container(),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4, left: firstWidth / widthFactor * 16),
+                          child: TextFormField(
+                            maxLines: 1,
+                            controller: _expiryDateController,
+                            cursorColor: widget.cursorColor ?? themeColor,
+                            style: textStyle,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              contentPadding: widget.textFieldsContentPadding,
+                              border: const OutlineInputBorder(),
+                              labelText: localizedText.expiryDateLabel,
+                              hintText: localizedText.expiryDateHint,
+                              alignLabelWithHint: true,
+                              labelStyle: creditCardModel!.isExpiryDateInvalid || creditCardModel!.isDateExpired ? TextStyle(color: Colors.red[800]!) : null,
+                              enabledBorder: creditCardModel!.isExpiryDateInvalid || creditCardModel!.isDateExpired ? OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.red[800]!
+                                ),
+                              ) : null,
+                              focusedBorder: creditCardModel!.isExpiryDateInvalid || creditCardModel!.isDateExpired ? OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.red[800]!
+                                ),
+                              ) : null,
+                              focusColor: creditCardModel!.isExpiryDateInvalid || creditCardModel!.isDateExpired ? Colors.red : null,
+                              isDense: true,
+                            ),
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: firstWidth / widthFactor * 16, left: height / heightFactor * 4),
+                          child: TextField(
+                            maxLines: 1,
+                            focusNode: cvvFocusNode,
+                            controller: _cvvCodeController,
+                            cursorColor: widget.cursorColor ?? themeColor,
+                            style: textStyle,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              contentPadding: widget.textFieldsContentPadding,
+                              border: const OutlineInputBorder(),
+                              labelText: localizedText.cvvLabel,
+                              hintText: localizedText.cvvHint,
+                              alignLabelWithHint: true,
+                              isDense: true,
+                            ),
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            onChanged: (String text) {
+                              setState(() {
+                                cvvCode = text;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                creditCardModel!.isExpiryDateInvalid ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4),
+                          child: widget.invalidExpiryDateWidget
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: height / heightFactor * 4),
+                          child: Container(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) : creditCardModel!.isDateExpired ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: height / heightFactor * 4),
+                          child: widget.expiredDateWidget,
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: height / heightFactor * 4),
+                          child: Container(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) : Container(),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2, horizontal: firstWidth / widthFactor * 16),
+                  child: TextFormField(
+                    maxLines: 1,
+                    controller: _cardHolderNameController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cardHolderLabel,
+                      hintText: localizedText.cardHolderHint,
+                      alignLabelWithHint: true,
+                      isDense: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[LengthLimitingTextFieldFormatterFixed(20), UpperCaseTextFormatter()],
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                Container(
+                  height: height,
+                  padding: EdgeInsets.symmetric(vertical: height / heightFactor * 2),
+                  margin: EdgeInsets.symmetric(vertical: height / heightFactor * 2, horizontal: firstWidth / widthFactor * 16),
+                  child: TextFormField(
+                    maxLines: 1,
+                    controller: _cpfCnpjController,
+                    cursorColor: widget.cursorColor ?? themeColor,
+                    style: textStyle,
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      contentPadding: widget.textFieldsContentPadding,
+                      border: const OutlineInputBorder(),
+                      labelText: localizedText.cpfCnpjLabelDefault,
+                      hintText: localizedText.cardHolderHint,
+                      alignLabelWithHint: true,
+                      labelStyle: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? TextStyle(color: Colors.red[800]!) : null,
+                      enabledBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red[800]!
+                        ),
+                      ) : null,
+                      focusedBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red[800]!
+                        ),
+                      ) : null,
+                      isDense: true,
+                    ),
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                  ),
+                ),
+                creditCardModel!.isCpfCnpjInvalid && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  child: creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length <= 11 ? 
+                    widget.invalidCpfWidget : widget.invalidCnpjWidget,
+                ) : Container(),
+              ],
+            ) : SingleChildScrollView(
             controller: widget.creditCardFormScrollController,
             child: Column(
               children: <Widget>[
