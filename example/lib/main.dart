@@ -54,7 +54,7 @@ class MyAppState extends State<MyApp> {
     mediaQueryData = MediaQuery.of(context);
     cardName = CreditCardWidgetState.getCardTypeName(cardNumber!);
     isCardNameInvalid = cardNumber!.replaceAll(' ', '').length > 5 && validCardNamesText.indexWhere((String el) => el == cardName) == -1;
-    final ScrollController creditCardFormScrollController = ScrollController();
+    //final ScrollController creditCardFormScrollController = ScrollController();
     final List<CardNameConfig> cardNamesConfigs = <CardNameConfig>[
       const CardNameConfig(
         name: 'ELO',
@@ -201,6 +201,7 @@ class MyAppState extends State<MyApp> {
                       height: 500,
                       fontSizeFactor: 14,
                       textFieldsContentPadding: EdgeInsets.symmetric(vertical: constraints.biggest.height / 71 * 6.5, horizontal: constraints.biggest.width / 360 * 8),
+                      //creditCardFormScrollController: creditCardFormScrollController,
                       invalidCardNameWidget: isCardNameInvalid ? Container(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
