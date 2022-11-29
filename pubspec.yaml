@@ -1,17 +1,17 @@
 name: flutter_credit_card_brazilian
 description: Componente para Cartão de Credito.
-version: 1.0.5
+version: 1.1.0
 homepage: https://github.com/JoseBarreto1/flutter_credit_card_brazilian
 issue_tracker : https://github.com/JoseBarreto1/flutter_credit_card_brazilian/issues
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
-  auto_size_text: ^3.0.0-nullsafety.0
+  auto_size_text: 3.0.0
   flutter:
     sdk: flutter
-  intl: ^0.17.0
+  intl: 0.17.0
 
 dev_dependencies:
   flutter_test:

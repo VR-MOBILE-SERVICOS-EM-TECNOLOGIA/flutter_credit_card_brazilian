@@ -75,3 +75,6 @@ ios/.generated/
 instapk.log*
 /pubspec.lock
 example/ios/Flutter/flutter_export_environment.sh
+
+# FVM
+.fvm/flutter_sdk
