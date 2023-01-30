@@ -183,7 +183,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     cardInfos = CreditCardWidgetState.detectCCType(cardNumber);
 
     if (cardInfos['type'] == CardType.americanExpress) {
-      if (widget.localizedText != null)
+      if (widget.localizedText != null) {
         localizedText = LocalizedText(
           cardHolderHint: widget.localizedText!.cardHolderHint,
           cardHolderLabel: widget.localizedText!.cardHolderLabel,
@@ -194,11 +194,13 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           expiryDateHint: widget.localizedText!.expiryDateHint,
           expiryDateLabel: widget.localizedText!.expiryDateLabel,
         );
-      else
+      }
+      else {
         localizedText = const LocalizedText();
+      }
     }
     else {
-      if (widget.localizedText != null)
+      if (widget.localizedText != null) {
         localizedText = LocalizedText(
           cardHolderHint: widget.localizedText!.cardHolderHint,
           cardHolderLabel: widget.localizedText!.cardHolderLabel,
@@ -209,8 +211,10 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           expiryDateHint: widget.localizedText!.expiryDateHint,
           expiryDateLabel: widget.localizedText!.expiryDateLabel,
         );
-      else
+      }
+      else {
         localizedText = const LocalizedText();
+      }
     }
   }
 
@@ -219,10 +223,11 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     updateMasks(widget.cardNumber);
 
     final Orientation orientation = MediaQuery.of(context).orientation;
-    if (widget.cardName != null)
+    if (widget.cardName != null) {
       Future<dynamic>.delayed(Duration.zero, () async {
         return widget.cardName!(getCardTypeName(widget.cardNumber));
       });
+    }
 
     ///
     /// If uer adds CVV then toggle the card from front to back..
@@ -235,10 +240,12 @@ class CreditCardWidgetState extends State<CreditCardWidget>
       controller.reverse();
     }
 
-    if (detectCCType(widget.cardNumber)['type'] == CardType.americanExpress)
+    if (detectCCType(widget.cardNumber)['type'] == CardType.americanExpress) {
       isAmex = true;
-    else
+    }
+    else {
       isAmex = false;
+    }
 
     return LayoutBuilder(
       builder: (BuildContext contextLayout, BoxConstraints constraints) {
@@ -270,7 +277,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     BuildContext context,
     Orientation orientation,
   ) {
-    final TextStyle defaultTextStyle = Theme.of(context).textTheme.headline6!.merge(
+    final TextStyle defaultTextStyle = Theme.of(context).textTheme.titleLarge!.merge(
           TextStyle(
             color: widget.backFontColor,
             fontFamily: 'RobotoMono',
@@ -370,7 +377,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
                   margin: widget.cardPadding,
                   child: LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      return widget.isCardNameInvalid ? Container() : Container(
+                      return widget.isCardNameInvalid ? Container() : SizedBox(
                         height: constraints.biggest.height,
                         width: constraints.biggest.height,
                         child: getCardTypeIcon(widget.cardNumber, widget.cardNamesConfigs)
@@ -397,7 +404,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     Orientation orientation,
   ) {
     //widget.cardName(getCardTypeName(widget.cardNumber));
-    final TextStyle numberTextStyle = Theme.of(context).textTheme.headline6!.merge(
+    final TextStyle numberTextStyle = Theme.of(context).textTheme.titleLarge!.merge(
           TextStyle(
             color: widget.isCardNameInvalid || getCardTypeName(widget.cardNumber) == '' || widget.cardNumber.replaceAll(' ', '').length < 6 ? widget.backFontColor : widget.frontFontColor,
             fontFamily: 'RobotoMono',
@@ -415,7 +422,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           ),
         );
     
-    final TextStyle dateTextStyle = Theme.of(context).textTheme.headline6!.merge(
+    final TextStyle dateTextStyle = Theme.of(context).textTheme.titleLarge!.merge(
           TextStyle(
             color: widget.isCardNameInvalid || getCardTypeName(widget.cardNumber) == '' || widget.cardNumber.replaceAll(' ', '').length < 6 ? widget.backFontColor : widget.frontFontColor,
             fontFamily: 'RobotoMono',
@@ -433,7 +440,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
           ),
         );
 
-    final TextStyle holderTextStyle = Theme.of(context).textTheme.headline6!.merge(
+    final TextStyle holderTextStyle = Theme.of(context).textTheme.titleLarge!.merge(
           TextStyle(
             color: widget.isCardNameInvalid || getCardTypeName(widget.cardNumber) == '' || widget.cardNumber.replaceAll(' ', '').length < 6 ? widget.backFontColor : widget.frontFontColor,
             fontFamily: 'RobotoMono',
@@ -487,7 +494,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
                     margin: const EdgeInsets.all(0),
                     child: LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
-                        return widget.isCardNameInvalid ? Container() : Container(
+                        return widget.isCardNameInvalid ? Container() : SizedBox(
                           height: constraints.biggest.height,
                           width: constraints.biggest.height,
                           child: getCardTypeIcon(widget.cardNumber, widget.cardNamesConfigs),
@@ -884,6 +891,10 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     },
   ];
 
+  void findCardType() {
+    
+  }
+
   /// This function determines the Credit Card type based on the cardPatterns
   /// and returns it.
   static Map<String, dynamic> detectCCType(String cardNumber) {
@@ -894,42 +905,40 @@ class CreditCardWidgetState extends State<CreditCardWidget>
       return result;
     }
 
-    cardsInfos.forEach(
-      (Map<String, dynamic> cardInfos) {
-        for (List<String> patternRange in cardInfos['pattern']) {
-          // Remove any spaces
-          String ccPatternStr =
-              cardNumber.replaceAll(RegExp(r'\s+\b|\b\s'), '');
-          final int rangeLen = patternRange[0].length;
-          // Trim the Credit Card number string to match the pattern prefix length
-          if (rangeLen < cardNumber.length) {
-            ccPatternStr = ccPatternStr.substring(0, rangeLen);
-          }
+    for (Map<String, dynamic> cardInfos in cardsInfos) {
+      for (List<String> patternRange in cardInfos['pattern']) {
+        // Remove any spaces
+        String ccPatternStr =
+            cardNumber.replaceAll(RegExp(r'\s+\b|\b\s'), '');
+        final int rangeLen = patternRange[0].length;
+        // Trim the Credit Card number string to match the pattern prefix length
+        if (rangeLen < cardNumber.length) {
+          ccPatternStr = ccPatternStr.substring(0, rangeLen);
+        }
 
-          if (patternRange.length > 1) {
-            // Convert the prefix range into numbers then make sure the
-            // Credit Card num is in the pattern range.
-            // Because Strings don't have '>=' type operators
-            final int ccPrefixAsInt = int.parse(ccPatternStr);
-            final int startPatternPrefixAsInt = int.parse(patternRange[0]);
-            final int endPatternPrefixAsInt = int.parse(patternRange[1]);
-            if (ccPrefixAsInt >= startPatternPrefixAsInt &&
-                ccPrefixAsInt <= endPatternPrefixAsInt) {
-              // Found a match
-              result = cardInfos;
-              break;
-            }
-          } else {
-            // Just compare the single pattern prefix with the Credit Card prefix
-            if (ccPatternStr == patternRange[0]) {
-              // Found a match
-              result = cardInfos;
-              break;
-            }
+        if (patternRange.length > 1) {
+          // Convert the prefix range into numbers then make sure the
+          // Credit Card num is in the pattern range.
+          // Because Strings don't have '>=' type operators
+          final int ccPrefixAsInt = int.parse(ccPatternStr);
+          final int startPatternPrefixAsInt = int.parse(patternRange[0]);
+          final int endPatternPrefixAsInt = int.parse(patternRange[1]);
+          if (ccPrefixAsInt >= startPatternPrefixAsInt &&
+              ccPrefixAsInt <= endPatternPrefixAsInt) {
+            // Found a match
+            result = cardInfos;
+            break;
+          }
+        } else {
+          // Just compare the single pattern prefix with the Credit Card prefix
+          if (ccPatternStr == patternRange[0]) {
+            // Found a match
+            result = cardInfos;
+            break;
           }
         }
-      },
-    );
+      }
+    }
 
     return result;
   }
@@ -939,17 +948,20 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   static Widget? getCardTypeIcon(String cardNumber, List<CardNameConfig>? cardNamesConfigs) {
     String? imageUrl = '';
     
-    if (cardNamesConfigs != null)
+    if (cardNamesConfigs != null) {
       imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.name == detectCCType(cardNumber)['name'], orElse: () => const CardNameConfig(name: '', url: '')).url;
+    }
     
-    if (imageUrl != '' && imageUrl != null)
+    if (imageUrl != '' && imageUrl != null) {
       return Image.network(
         imageUrl,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
       );
-    else
+    }
+    else {
       return detectCCType(cardNumber)['icon'];
+    }
   }
 
   // This method returns the icon for the visa card type if found
@@ -963,17 +975,20 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   static Widget? getCardTypeIconByCardName(String cardName, {List<CardNameConfig>? cardNamesConfigs, String? cardImageUrl}) {
     String? imageUrl = '';
     
-    if (cardNamesConfigs != null)
+    if (cardNamesConfigs != null) {
       imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.name == cardName, orElse: () => const CardNameConfig(name: '', url: '')).url;
+    }
 
-    if ((imageUrl != '' && imageUrl != null) || cardImageUrl != null)
+    if ((imageUrl != '' && imageUrl != null) || cardImageUrl != null) {
       return Image.network(
         imageUrl ?? cardImageUrl!,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
       );
-    else
+    }
+    else {
       return cardsInfos.singleWhere((Map<String, dynamic> el) => el['name'] == cardName)['icon'];
+    }
   }
 
   static String? getCardTypeName(String cardNumber) {
@@ -983,6 +998,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
 
 class AnimationCard extends StatelessWidget {
   const AnimationCard({
+    super.key, 
     required this.child,
     required this.animation,
   });
@@ -1056,12 +1072,13 @@ class MaskedTextController extends TextEditingController {
 
   @override
   set text(String? newText) {
-    if (super.text != newText)
+    if (super.text != newText) {
       value = value.copyWith(
         text: newText,
         selection: TextSelection.fromPosition(TextPosition(offset: newText!.length)),
         composing: TextRange.empty,
       );
+    }
   }
 
   static Map<String, RegExp> getDefaultTranslator() {
@@ -1092,8 +1109,9 @@ class MaskedTextController extends TextEditingController {
 
       String maskChar = '0';
 
-      if (mask!.length > maskCharIndex)
+      if (mask!.length > maskCharIndex) {
         maskChar = mask[maskCharIndex];
+      }
 
       final String valueChar = value[valueCharIndex];
 
