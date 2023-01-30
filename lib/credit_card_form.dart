@@ -213,10 +213,10 @@ class CreditCardForm extends StatefulWidget {
   final EdgeInsetsGeometry? textFieldsContentPadding;
 
   @override
-  _CreditCardFormState createState() => _CreditCardFormState();
+  CreditCardFormState createState() => CreditCardFormState();
 }
 
-class _CreditCardFormState extends State<CreditCardForm> {
+class CreditCardFormState extends State<CreditCardForm> {
   String? cardNumber;
   String? cardName;
   String? expiryDate;
@@ -254,8 +254,9 @@ class _CreditCardFormState extends State<CreditCardForm> {
     // remove all non digit characters
     value = value.replaceAll(RegExp(r'\D'), '');
     
-    if (value.length < qtdDigits)
+    if (value.length < qtdDigits) {
       return true;
+    }
 
     int sum = 0;
     bool shouldDouble = false;
@@ -264,8 +265,9 @@ class _CreditCardFormState extends State<CreditCardForm> {
       int digit = int.tryParse(value[i])!;
       
       if (shouldDouble) {
-        if ((digit *= 2) > 9)
+        if ((digit *= 2) > 9) {
           digit -= 9;
+        }
       }
 
       sum += digit;
@@ -330,10 +332,12 @@ class _CreditCardFormState extends State<CreditCardForm> {
   }
 
   void updateCpfCnpjMasks() {
-    if (_cpfCnpjController.text.replaceAll(RegExp(r'\D'), '').length <= 11)
+    if (_cpfCnpjController.text.replaceAll(RegExp(r'\D'), '').length <= 11) {
       _cpfCnpjController.updateMask('000.000.000-00');
-    else
+    }
+    else {
       _cpfCnpjController.updateMask('00.000.000/0000-00');
+    }
   }
 
   @override
@@ -430,7 +434,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
         primaryColor: themeColor!.withOpacity(0.8),
         primaryColorDark: themeColor,
       ),
-      child: Container(
+      child: SizedBox(
         height: firstHeight,
         width: firstWidth,
         child: Form(
