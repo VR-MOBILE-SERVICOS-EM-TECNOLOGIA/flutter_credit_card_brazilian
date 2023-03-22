@@ -1,6 +1,6 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\wladr\fvm\versions\3.7.0"
+export "FLUTTER_ROOT=C:\Users\wladr\fvm\versions\3.7.7"
 export "FLUTTER_APPLICATION_PATH=C:\Users\wladr\Documents\Github\vrconnectapp\packages\flutter_credit_card_brazilian"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib\main.dart"
