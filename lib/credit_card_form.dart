@@ -163,12 +163,15 @@ class CreditCardForm extends StatefulWidget {
     Key? key,
     this.cardNumber,
     this.cardName,
+    required this.cardNameWithRadioVoucherOptions,
     this.expiryDate,
     this.cardHolderName,
     this.cpfCnpj,
     this.cvvCode,
+    this.voucherTypeSelected,
     this.height,
     this.width,
+    this.radioScale = 0.6,
     required this.onCreditCardModelChange,
     this.themeColor,
     this.textStyle,
@@ -189,12 +192,15 @@ class CreditCardForm extends StatefulWidget {
 
   final String? cardNumber;
   final String? cardName;
+  final bool cardNameWithRadioVoucherOptions;
   final String? expiryDate;
   final String? cardHolderName;
   final String? cpfCnpj;
   final String? cvvCode;
+  final int? voucherTypeSelected;
   final double? height;
   final double? width;
+  final double radioScale;
   final void Function(CreditCardModel?) onCreditCardModelChange;
   final Color? themeColor;
   final TextStyle? textStyle;
@@ -224,6 +230,7 @@ class CreditCardFormState extends State<CreditCardForm> {
   String? cpfCnpj;
   String? cvvCode;
   bool isCvvFocused = false;
+  int? voucherTypeSelected;
   Color? themeColor;
   TextStyle? textStyle;
   bool isCardNumberInvalid = false;
@@ -284,13 +291,24 @@ class CreditCardFormState extends State<CreditCardForm> {
   void createCreditCardModel() {
     cardNumber = widget.cardNumber ?? '';
     cardName = widget.cardName ?? '';
+    voucherTypeSelected = widget.voucherTypeSelected;
     expiryDate = widget.expiryDate ?? '';
     cardHolderName = widget.cardHolderName ?? '';
     cpfCnpj = widget.cpfCnpj ?? '';
     cvvCode = widget.cvvCode ?? '';
 
-    creditCardModel = CreditCardModel(cardNumber, cardName, expiryDate,
-        cardHolderName, cpfCnpj, cvvCode, isCvvFocused, !checkLuhn(cardNumber!), !validaCpfCnpj(cpfCnpj!));
+    creditCardModel = CreditCardModel(
+      cardNumber,
+      cardName,
+      expiryDate,
+      cardHolderName,
+      cpfCnpj,
+      cvvCode,
+      voucherTypeSelected,
+      isCvvFocused,
+      !checkLuhn(cardNumber!),
+      !validaCpfCnpj(cpfCnpj!)
+    );
 
     _cardNumberController.text = cardNumber;
     _expiryDateController.text = expiryDate;
@@ -360,6 +378,7 @@ class CreditCardFormState extends State<CreditCardForm> {
       setState(() {
         cardNumber = _cardNumberController.text;
         creditCardModel!.cardName = cardName;
+        creditCardModel!.voucherType = voucherTypeSelected;
         creditCardModel!.cardNumber = cardNumber;
         creditCardModel!.isCardNumberInvalid = !checkLuhn(cardNumber!);
         onCreditCardModelChange(creditCardModel);
@@ -423,7 +442,7 @@ class CreditCardFormState extends State<CreditCardForm> {
     const double widthFactor = 360;
     final double firstHeight = widget.height == null && widget.constraints != null ? widget.constraints!.biggest.height : widget.height!;
     final double firstWidth = widget.width == null && widget.constraints != null ? widget.constraints!.biggest.width : widget.width!;
-    final double height = firstHeight / 5;
+    final double height = firstHeight / 7;
     textStyle = TextStyle(
       color: Colors.black,
       fontSize: height / heightFactor * widget.fontSizeFactor,
@@ -481,7 +500,69 @@ class CreditCardFormState extends State<CreditCardForm> {
                 ) : Container(),
                 widget.invalidCardNameWidget != null ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  alignment: Alignment.centerLeft,
                   child: widget.invalidCardNameWidget,
+                ) : Container(),
+                widget.invalidCardNameWidget == null && widget.cardNameWithRadioVoucherOptions ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstWidth / widthFactor),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Modalidade',
+                        style: textStyle,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 0,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Alimentação',
+                            style: textStyle,
+                          ),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 1,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Refeição',
+                            style: textStyle,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ) : Container(),
                 Container(
                   height: height,
@@ -699,7 +780,69 @@ class CreditCardFormState extends State<CreditCardForm> {
                 ) : Container(),
                 widget.invalidCardNameWidget != null ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  alignment: Alignment.centerLeft,
                   child: widget.invalidCardNameWidget,
+                ) : Container(),
+                widget.invalidCardNameWidget == null && widget.cardNameWithRadioVoucherOptions ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstWidth / widthFactor),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Modalidade',
+                        style: textStyle,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 0,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Alimentação',
+                            style: textStyle,
+                          ),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 1,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Refeição',
+                            style: textStyle,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ) : Container(),
                 Container(
                   height: height,

@@ -1,12 +1,14 @@
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'localized_text_model.dart';
 
 class CardNameConfig {
   const CardNameConfig({
-    required this.name,
+    required this.names,
+    required this.cardNamesForInvalidMsg,
     this.url,
     this.backgroundGradient = const LinearGradient(
       // Where the linear gradient begins and ends
@@ -16,12 +18,15 @@ class CardNameConfig {
         Color(0xff132c96),
         Color(0xff35c0fd),
       ],
-    )
+    ),
+    this.withRadioVoucherOptions = false,
   });
 
-  final String name;
+  final List<String> names;
+  final List<String> cardNamesForInvalidMsg;
   final String? url;
   final LinearGradient backgroundGradient;
+  final bool withRadioVoucherOptions;
 }
 
 class CurvePainter extends CustomPainter {
@@ -699,8 +704,6 @@ class CreditCardWidgetState extends State<CreditCardWidget>
         <String>['451416'],
         <String>['457393'],
         <String>['504175'],
-        <String>['506699', '506778'],
-        <String>['509000', '509999'],
         <String>['627780'],
         <String>['636297'],
         <String>['636368'],
@@ -727,6 +730,98 @@ class CreditCardWidgetState extends State<CreditCardWidget>
       'mask': '0000 0000 0000 0000',
       'type': CardType.elo,
       'name': 'ELO',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['506699', '506778'], // Alimentação
+        <String>['509000', '509999'],
+      },
+      'icon': Image.asset(
+        'icons/alelo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.alelo,
+      'name': 'ALELO ALIMENTAÇÃO',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['506699', '506778'], // Alimentação
+        <String>['509000', '509999'],
+      },
+      'icon': Image.asset(
+        'icons/alelo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.alelo,
+      'name': 'ALELO REFEIÇÃO',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['603389'], // Alimentação
+      },
+      'icon': Image.asset(
+        'icons/sodexo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.sodexo,
+      'name': 'SODEXO ALIMENTAÇÃO',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['606071'], // Refeição
+      },
+      'icon': Image.asset(
+        'icons/sodexo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.sodexo,
+      'name': 'SODEXO REFEIÇÃO',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['606068'], // Gift
+      },
+      'icon': Image.asset(
+        'icons/sodexo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.sodexo,
+      'name': 'SODEXO GIFT',
+    },
+    <String, dynamic>{
+      'pattern': <List<String>>{
+        <String>['606069'], // Premium
+      },
+      'icon': Image.asset(
+        'icons/sodexo.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        package: 'flutter_credit_card_brazilian',
+      ),
+      'hint': '**** **** **** ****',
+      'mask': '0000 0000 0000 0000',
+      'type': CardType.sodexo,
+      'name': 'SODEXO PREMIUM',
     },
     <String, dynamic>{
       'pattern': <List<String>>{
@@ -949,7 +1044,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     String? imageUrl = '';
     
     if (cardNamesConfigs != null) {
-      imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.name == detectCCType(cardNumber)['name'], orElse: () => const CardNameConfig(name: '', url: '')).url;
+      imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.names.singleWhereOrNull((String name) => name == detectCCType(cardNumber)['name']) != null, orElse: () => const CardNameConfig(names: <String>[''], cardNamesForInvalidMsg: <String>[''], url: '')).url;
     }
     
     if (imageUrl != '' && imageUrl != null) {
@@ -967,7 +1062,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
   // This method returns the icon for the visa card type if found
   // else will return the empty container
   static LinearGradient getCardBackground(String? cardName, List<CardNameConfig> cardNamesConfigs) {
-    return cardNamesConfigs.singleWhere((CardNameConfig el) => el.name == cardName, orElse: () => const CardNameConfig(name: '', url: '')).backgroundGradient;
+    return cardNamesConfigs.singleWhere((CardNameConfig el) => el.names.singleWhereOrNull((String name) => name == cardName) != null, orElse: () => const CardNameConfig(names: <String>[''], cardNamesForInvalidMsg: <String>[''], url: '')).backgroundGradient;
   }
 
   // This method returns the icon for the visa card type if found
@@ -976,7 +1071,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     String? imageUrl = '';
     
     if (cardNamesConfigs != null) {
-      imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.name == cardName, orElse: () => const CardNameConfig(name: '', url: '')).url;
+      imageUrl = cardNamesConfigs.singleWhere((CardNameConfig el) => el.names.singleWhereOrNull((String name) => name == cardName) != null, orElse: () => const CardNameConfig(names: <String>[''], cardNamesForInvalidMsg: <String>[''], url: '')).url;
     }
 
     if ((imageUrl != '' && imageUrl != null) || cardImageUrl != null) {
@@ -1162,5 +1257,7 @@ enum CardType {
   banese,
   credishop,
   cabal,
-  aura
+  aura,
+  alelo,
+  sodexo,
 }

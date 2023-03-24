@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
 
@@ -42,7 +43,18 @@ class MyAppState extends State<MyApp> {
   bool isCardNumberInvalid = false;
   late MediaQueryData mediaQueryData;
   List<Widget> validCardNames = <Widget>[];
-  List<String> validCardNamesText = const <String>['VISA', 'MASTERCARD', 'HIPERCARD', 'ELO'];
+  List<String> validCardNamesText = const <String>[
+    'VISA',
+    'MASTERCARD',
+    'HIPERCARD',
+    'ELO',
+    'ALELO ALIMENTAÇÃO',
+    'ALELO REFEIÇÃO',
+    'SODEXO ALIMENTAÇÃO',
+    'SODEXO REFEIÇÃO',
+    'SODEXO GIFT',
+    'SODEXO PREMIUM',
+  ];
 
   @override
   void initState() {
@@ -57,7 +69,9 @@ class MyAppState extends State<MyApp> {
     //final ScrollController creditCardFormScrollController = ScrollController();
     final List<CardNameConfig> cardNamesConfigs = <CardNameConfig>[
       const CardNameConfig(
-        name: 'ELO',
+        names: <String>['ELO'],
+        cardNamesForInvalidMsg: <String>['ELO'],
+        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -69,7 +83,9 @@ class MyAppState extends State<MyApp> {
         ),
       ),
       const CardNameConfig(
-        name: 'VISA',
+        names: <String>['VISA'],
+        cardNamesForInvalidMsg: <String>['VISA'],
+        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -81,7 +97,9 @@ class MyAppState extends State<MyApp> {
         ),
       ),
       const CardNameConfig(
-        name: 'MASTERCARD',
+        names: <String>['MASTERCARD'],
+        cardNamesForInvalidMsg: <String>['MASTERCARD'],
+        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -93,7 +111,9 @@ class MyAppState extends State<MyApp> {
         ),
       ),
       const CardNameConfig(
-        name: 'HIPERCARD',
+        names: <String>['HIPERCARD'],
+        cardNamesForInvalidMsg: <String>['HIPERCARD'],
+        url: null,
         backgroundGradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.bottomRight,
@@ -101,6 +121,33 @@ class MyAppState extends State<MyApp> {
           colors: <Color>[
             Color(0xff913c3c),
             Color(0xffbe6060),
+          ],
+        ),
+      ),
+      const CardNameConfig(
+        names: <String>['ALELO REFEIÇÃO', 'ALELO ALIMENTAÇÃO'],
+        cardNamesForInvalidMsg: <String>['ALELO'],
+        withRadioVoucherOptions: true,
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xffd0d83d),
+            Color(0xff007858),
+          ],
+        ),
+      ),
+      const CardNameConfig(
+        names: <String>['SODEXO ALIMENTAÇÃO', 'SODEXO REFEIÇÃO', 'SODEXO GIFT', 'SODEXO PREMIUM'],
+        cardNamesForInvalidMsg: <String>['SODEXO'],
+        backgroundGradient: LinearGradient(
+          // Where the linear gradient begins and ends
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          colors: <Color>[
+            Color(0xffffffff),
+            Color(0xff11498F),
           ],
         ),
       ),
@@ -145,7 +192,7 @@ class MyAppState extends State<MyApp> {
                 ),
               ),
               Container(
-                height: 500,
+                height: 400,
                 child: LayoutBuilder(
                   builder: (BuildContext contextLayout, BoxConstraints constraints) {
                     void addCardNameWidget(String cardName) {
@@ -189,16 +236,19 @@ class MyAppState extends State<MyApp> {
                       validCardNamesText.forEach(addCardNameWidget);
                     }
 
+                    final CardNameConfig? selected = cardNamesConfigs.singleWhereOrNull((CardNameConfig el) => el.names.singleWhereOrNull((String name) => name == cardName) != null);
+
                     return CreditCardForm(
                       validCardNames: validCardNamesText,
                       cardName: cardName,
+                      cardNameWithRadioVoucherOptions: selected != null ? selected.withRadioVoucherOptions : false,
                       cardHolderName: cardHolderName,
                       cardNumber: cardNumber,
                       cvvCode: cvvCode,
                       expiryDate: expiryDate,
                       cpfCnpj: cpfCnpj,
                       constraints: constraints,
-                      height: 500,
+                      height: 400,
                       fontSizeFactor: 14,
                       textFieldsContentPadding: EdgeInsets.symmetric(vertical: constraints.biggest.height / 71 * 6.5, horizontal: constraints.biggest.width / 360 * 8),
                       //creditCardFormScrollController: creditCardFormScrollController,
