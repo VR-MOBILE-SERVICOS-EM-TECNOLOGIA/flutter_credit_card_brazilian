@@ -500,59 +500,69 @@ class CreditCardFormState extends State<CreditCardForm> {
                 ) : Container(),
                 widget.invalidCardNameWidget != null ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  alignment: Alignment.centerLeft,
                   child: widget.invalidCardNameWidget,
                 ) : Container(),
-                widget.invalidCardNameWidget == null && widget.cardNameWithRadioVoucherOptions ? Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Radio<int?>(
-                          value: 0,
-                          visualDensity: VisualDensity.compact,
-                          groupValue: voucherTypeSelected,
-                          onChanged: (int? value) {
-                            setState(() {
-                              voucherTypeSelected = value;
-                              
-                              if (creditCardModel != null) {
-                                creditCardModel!.voucherType = voucherTypeSelected;
-                                onCreditCardModelChange(creditCardModel);
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          'Vale Alimentação',
-                          style: textStyle,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Radio<int?>(
-                          value: 1,
-                          visualDensity: VisualDensity.compact,
-                          groupValue: voucherTypeSelected,
-                          onChanged: (int? value) {
-                            setState(() {
-                              voucherTypeSelected = value;
-                                          
-                              if (creditCardModel != null) {
-                                creditCardModel!.voucherType = voucherTypeSelected;
-                                onCreditCardModelChange(creditCardModel);
-                              }
-                            });
-                          },
-                        ),
-                        Text(
-                          'Vale Refeição',
-                          style: textStyle,
-                        ),
-                      ],
-                    ),
-                  ],
+                widget.invalidCardNameWidget == null && widget.cardNameWithRadioVoucherOptions ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstWidth / widthFactor),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Modalidade',
+                        style: textStyle,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 0,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Alimentação',
+                            style: textStyle,
+                          ),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 1,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Refeição',
+                            style: textStyle,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ) : Container(),
                 Container(
                   height: height,
@@ -770,56 +780,63 @@ class CreditCardFormState extends State<CreditCardForm> {
                 ) : Container(),
                 widget.invalidCardNameWidget != null ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
+                  alignment: Alignment.centerLeft,
                   child: widget.invalidCardNameWidget,
                 ) : Container(),
                 widget.invalidCardNameWidget == null && widget.cardNameWithRadioVoucherOptions ? Container(
-                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16),
+                  margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstWidth / widthFactor),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Radio<int?>(
-                            value: 0,
-                            visualDensity: VisualDensity.compact,
-                            groupValue: voucherTypeSelected,
-                            onChanged: (int? value) {
-                              setState(() {
-                                voucherTypeSelected = value;
-                                              
-                                if (creditCardModel != null) {
-                                  creditCardModel!.voucherType = voucherTypeSelected;
-                                  onCreditCardModelChange(creditCardModel);
-                                }
-                              });
-                            },
-                          ),
-                          Text(
-                            'Vale Alimentação',
-                            style: textStyle,
-                          ),
-                        ],
+                      Text(
+                        'Modalidade',
+                        style: textStyle,
                       ),
                       Row(
                         children: <Widget>[
-                          Radio<int?>(
-                            value: 1,
-                            visualDensity: VisualDensity.compact,
-                            groupValue: voucherTypeSelected,
-                            onChanged: (int? value) {
-                              setState(() {
-                                voucherTypeSelected = value;
-                                              
-                                if (creditCardModel != null) {
-                                  creditCardModel!.voucherType = voucherTypeSelected;
-                                  onCreditCardModelChange(creditCardModel);
-                                }
-                              });
-                            },
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 0,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
                           ),
                           Text(
-                            'Vale Refeição',
+                            'Alimentação',
+                            style: textStyle,
+                          ),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Radio<int?>(
+                              value: 1,
+                              visualDensity: VisualDensity.compact,
+                              groupValue: voucherTypeSelected,
+                              onChanged: (int? value) {
+                                setState(() {
+                                  voucherTypeSelected = value;
+                                                
+                                  if (creditCardModel != null) {
+                                    creditCardModel!.voucherType = voucherTypeSelected;
+                                    onCreditCardModelChange(creditCardModel);
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          Text(
+                            'Refeição',
                             style: textStyle,
                           ),
                         ],
