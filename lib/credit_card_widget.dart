@@ -1067,7 +1067,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
 
   // This method returns the icon for the visa card type if found
   // else will return the empty container
-  static Widget? getCardTypeIconByCardName(String cardName, {List<CardNameConfig>? cardNamesConfigs, String? cardImageUrl}) {
+  static Widget? getCardTypeIconByCardName(String cardName, {List<CardNameConfig>? cardNamesConfigs, String? cardImageUrl, Map<String, String>? headers}) {
     String? imageUrl = '';
     
     if (cardNamesConfigs != null) {
@@ -1077,6 +1077,7 @@ class CreditCardWidgetState extends State<CreditCardWidget>
     if ((imageUrl != '' && imageUrl != null) || cardImageUrl != null) {
       return Image.network(
         imageUrl ?? cardImageUrl!,
+        headers: headers,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
       );
