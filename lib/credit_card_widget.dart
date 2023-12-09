@@ -60,7 +60,7 @@ class CurvePainter extends CustomPainter {
 
 class CreditCardWidget extends StatefulWidget {
   const CreditCardWidget({
-    Key? key,
+    super.key,
     required this.cardNumber,
     this.cardName,
     required this.expiryDate,
@@ -99,8 +99,7 @@ class CreditCardWidget extends StatefulWidget {
     this.cardBorder = const Border(),
     this.localizedText = const LocalizedText(),
     this.isCardNameInvalid = false,
-  })  : assert(localizedText != null),
-        super(key: key);
+  })  : assert(localizedText != null);
 
   final String cardNumber;
   final String expiryDate;
@@ -1122,21 +1121,20 @@ class AnimationCard extends StatelessWidget {
 }
 
 class MaskedTextController extends TextEditingController {
-  MaskedTextController({String? text, this.mask, this.maxLength, Map<String, RegExp>? translator})
-      : super(text: text) {
+  MaskedTextController({super.text, this.mask, this.maxLength, Map<String, RegExp>? translator}) {
     this.translator = translator ?? MaskedTextController.getDefaultTranslator();
 
     addListener(() {
       final String previous = _lastUpdatedText;
-      if (beforeChange(previous, this.text)) {
-        updateText(this.text);
-        afterChange(previous, this.text);
+      if (beforeChange(previous, text)) {
+        updateText(text);
+        afterChange(previous, text);
       } else {
         updateText(_lastUpdatedText);
       }
     });
 
-    updateText(this.text);
+    updateText(text);
   }
 
   String? mask;
