@@ -136,7 +136,7 @@ bool validaCpfCnpj(String val) {
 /// Remove it once the issue above is fixed.
 class LengthLimitingTextFieldFormatterFixed
     extends LengthLimitingTextInputFormatter {
-  LengthLimitingTextFieldFormatterFixed(int maxLength) : super(maxLength);
+  LengthLimitingTextFieldFormatterFixed(int super.maxLength);
 
   @override
   TextEditingValue formatEditUpdate(
@@ -160,7 +160,7 @@ class LengthLimitingTextFieldFormatterFixed
 
 class CreditCardForm extends StatefulWidget {
   const CreditCardForm({
-    Key? key,
+    super.key,
     this.cardNumber,
     this.cardName,
     required this.cardNameWithRadioVoucherOptions,
@@ -188,7 +188,7 @@ class CreditCardForm extends StatefulWidget {
     this.creditCardFormScrollController,
     this.fontSizeFactor = 17,
     this.textFieldsContentPadding,
-  })  : super(key: key);
+  });
 
   final String? cardNumber;
   final String? cardName;
