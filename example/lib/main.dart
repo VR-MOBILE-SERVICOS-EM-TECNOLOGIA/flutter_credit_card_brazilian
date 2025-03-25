@@ -2,9 +2,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card_brazilian/flutter_credit_card.dart';
 
-void main() => runApp(MySample());
+void main() => runApp(const MySample());
 
 class MySample extends StatefulWidget {
+  const MySample({
+    super.key
+  });
+
   @override
   State<StatefulWidget> createState() {
     return MySampleState();
@@ -20,13 +24,15 @@ class MySampleState extends State<MySample> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyApp(),
+      home: const MyApp(),
     );
   }
 }
 
 /// Componente principal da aplicação
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   MyAppState createState() => MyAppState();
 }
@@ -158,45 +164,43 @@ class MyAppState extends State<MyApp> {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Container(
-                child: CreditCardWidget(
-                  cardNumber: cardNumber!,
-                  expiryDate: expiryDate!,
-                  cardHolderName: cardHolderName!,
-                  cardNamesConfigs: cardNamesConfigs,
-                  isCardNameInvalid: isCardNameInvalid,
-                  height: mediaQueryData.size.height / 4.3,
-                  width: mediaQueryData.size.height / 2.5,
-                  cardMargin: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 10, horizontal: mediaQueryData.size.width / 20),
-                  cardPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  cvvCode: cvvCode!,
-                  showBackView: isCvvFocused,
-                  frontFontColor: Colors.white,
-                  backFontColor: Colors.grey[700]!,
-                  fontSizeFactor: 32,
-                  cardBorder: Border(
-                    bottom: BorderSide(color: Colors.grey[400]!, width: 1),
-                    top: BorderSide(color: Colors.grey[400]!, width: 1),
-                    left: BorderSide(color: Colors.grey[400]!, width: 1),
-                    right: BorderSide(color: Colors.grey[400]!, width: 1),
-                  ),
-                  backgroundGradientColorNoCardName: const LinearGradient(
-                    // Where the linear gradient begins and ends
-                    begin: Alignment.bottomRight,
-                    end: Alignment.topLeft,
-                    colors: <Color>[
-                      Color(0xffbbbbbb),
-                      Color(0xffeeeeee),
-                    ],
-                  ),
+              CreditCardWidget(
+                cardNumber: cardNumber!,
+                expiryDate: expiryDate!,
+                cardHolderName: cardHolderName!,
+                cardNamesConfigs: cardNamesConfigs,
+                isCardNameInvalid: isCardNameInvalid,
+                height: mediaQueryData.size.height / 4.3,
+                width: mediaQueryData.size.height / 2.5,
+                cardMargin: EdgeInsets.symmetric(vertical: mediaQueryData.size.height / 10, horizontal: mediaQueryData.size.width / 20),
+                cardPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                cvvCode: cvvCode!,
+                showBackView: isCvvFocused,
+                frontFontColor: Colors.white,
+                backFontColor: Colors.grey[700]!,
+                fontSizeFactor: 32,
+                cardBorder: Border(
+                  bottom: BorderSide(color: Colors.grey[400]!, width: 1),
+                  top: BorderSide(color: Colors.grey[400]!, width: 1),
+                  left: BorderSide(color: Colors.grey[400]!, width: 1),
+                  right: BorderSide(color: Colors.grey[400]!, width: 1),
+                ),
+                backgroundGradientColorNoCardName: const LinearGradient(
+                  // Where the linear gradient begins and ends
+                  begin: Alignment.bottomRight,
+                  end: Alignment.topLeft,
+                  colors: <Color>[
+                    Color(0xffbbbbbb),
+                    Color(0xffeeeeee),
+                  ],
                 ),
               ),
-              Container(
+              SizedBox(
                 height: 400,
                 child: LayoutBuilder(
                   builder: (BuildContext contextLayout, BoxConstraints constraints) {
                     void addCardNameWidget(String cardName) {
-                      validCardNames.add(Container(
+                      validCardNames.add(SizedBox(
                         height: constraints.biggest.height / 20,
                         width: constraints.biggest.width / 20,
                         child: Container(
@@ -204,10 +208,10 @@ class MyAppState extends State<MyApp> {
                         ),
                       ));
 
-                      validCardNames.add(Container(
+                      validCardNames.add(SizedBox(
                         height: constraints.biggest.height / 20,
                         child: Text(
-                          ' ' + cardName + (validCardNamesText.last == cardName ? '' : ', '),
+                          ' $cardName${validCardNamesText.last == cardName ? '' : ', '}',
                           style: TextStyle(
                             color: Colors.red[800],
                             fontSize: constraints.biggest.height / 340 * 12,
@@ -220,7 +224,7 @@ class MyAppState extends State<MyApp> {
                     if (cardNumber != '' && isCardNameInvalid) {
                       validCardNames.clear();
 
-                      validCardNames.add(Container(
+                      validCardNames.add(SizedBox(
                         height: constraints.biggest.height / 20,
                         child: Text(
                           'Bandeiras válidas: ',
@@ -252,26 +256,24 @@ class MyAppState extends State<MyApp> {
                       fontSizeFactor: 14,
                       textFieldsContentPadding: EdgeInsets.symmetric(vertical: constraints.biggest.height / 71 * 6.5, horizontal: constraints.biggest.width / 360 * 8),
                       //creditCardFormScrollController: creditCardFormScrollController,
-                      invalidCardNameWidget: isCardNameInvalid ? Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'O estabelecimento não aceita essa bandeira para pagamento online.',
-                                style: TextStyle(
-                                  color: Colors.red[800],
-                                  fontSize: constraints.biggest.height / 340 * 12,
-                                ),
-                                textAlign: TextAlign.left,
+                      invalidCardNameWidget: isCardNameInvalid ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'O estabelecimento não aceita essa bandeira para pagamento online.',
+                              style: TextStyle(
+                                color: Colors.red[800],
+                                fontSize: constraints.biggest.height / 340 * 12,
                               ),
+                              textAlign: TextAlign.left,
                             ),
-                            Wrap(
-                              children: validCardNames,
-                            ),
-                          ],
-                        ),
+                          ),
+                          Wrap(
+                            children: validCardNames,
+                          ),
+                        ],
                       ) : null,
                       invalidCardNumberWidget: Container(
                         alignment: Alignment.centerLeft,
