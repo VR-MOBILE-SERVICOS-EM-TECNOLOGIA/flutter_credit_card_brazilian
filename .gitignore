@@ -77,4 +77,10 @@ instapk.log*
 example/ios/Flutter/flutter_export_environment.sh
 
 # FVM
-.fvm/flutter_sdk
+
+# FVM Version Cache
+.fvm/
+
+.android
+.ios
+example/android/app/.cxx

@@ -450,7 +450,7 @@ class CreditCardFormState extends State<CreditCardForm> {
 
     return Theme(
       data: ThemeData(
-        primaryColor: themeColor!.withOpacity(0.8),
+        primaryColor: themeColor!.withValues(alpha: 0.8),
         primaryColorDark: themeColor,
       ),
       child: SizedBox(

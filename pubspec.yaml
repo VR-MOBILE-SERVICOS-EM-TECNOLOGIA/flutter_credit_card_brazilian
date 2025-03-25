@@ -5,17 +5,17 @@ homepage: https://github.com/JoseBarreto1/flutter_credit_card_brazilian
 issue_tracker : https://github.com/JoseBarreto1/flutter_credit_card_brazilian/issues
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.7.2 <4.0.0'
 
 dependencies:
   auto_size_text: 3.0.0
-  collection: 1.18.0
+  collection: 1.19.1
   flutter:
     sdk: flutter
-  intl: 0.19.0
+  intl: 0.20.2
 
 dev_dependencies:
-  flutter_lints: 3.0.1
+  flutter_lints: 5.0.0
   flutter_test:
     sdk: flutter
 
