@@ -1201,7 +1201,7 @@ class MaskedTextController extends TextEditingController {
         break;
       }
 
-      String maskChar = '0';
+      String maskChar = '@';
 
       if (mask!.length > maskCharIndex) {
         maskChar = mask[maskCharIndex];
