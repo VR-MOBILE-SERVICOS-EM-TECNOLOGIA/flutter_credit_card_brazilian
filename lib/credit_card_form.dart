@@ -18,7 +18,7 @@ bool validaCpfCnpj(String val) {
   if (val.length == 14) {
     String cpf = val.trim();
   
-    cpf = cpf.replaceAll(RegExp(r'\D'), '');
+    cpf = cpf.replaceAll(RegExp(r'[^A-z|0-9]'), '');
     final List<String> cpfSplitted = cpf.split('');
     
     int v1 = 0;
@@ -36,7 +36,7 @@ bool validaCpfCnpj(String val) {
     } 
     
     for (int i = 0, p = 10; (cpfSplitted.length - 2) > i; i++, p--) {
-      v1 += int.parse(cpfSplitted[i]) * p; 
+      v1 += (int.tryParse(cpfSplitted[i]) ?? 0) * p; 
     } 
     
     v1 = v1 * 10 % 11;
@@ -45,12 +45,12 @@ bool validaCpfCnpj(String val) {
       v1 = 0; 
     }
     
-    if (v1 != int.parse(cpfSplitted[9])) {
+    if (cpfSplitted.length <= 9 || v1 != int.tryParse(cpfSplitted[9])) {
       return false; 
     } 
     
     for (int i = 0, p = 11; (cpfSplitted.length - 1) > i; i++, p--) {
-      v2 += int.parse(cpfSplitted[i]) * p; 
+      v2 += (int.tryParse(cpfSplitted[i]) ?? 0) * p; 
     } 
     
     v2 = v2 * 10 % 11;
@@ -59,72 +59,58 @@ bool validaCpfCnpj(String val) {
       v2 = 0; 
     }
     
-    if (v2 != int.parse(cpfSplitted[10])) {
+    if (cpfSplitted.length <= 10 || v2 != int.tryParse(cpfSplitted[10])) {
       return false; 
     } else {   
       return true; 
     }
   } else if (val.length == 18) {
-    String cnpj = val.trim();
-    
-    cnpj = cnpj.replaceAll(RegExp(r'\D'), ''); 
-    final List<String> cnpjSplitted = cnpj.split(''); 
-    
-    int v1 = 0;
-    int v2 = 0;
-    bool aux = false;
-    
-    for (int i = 1; cnpjSplitted.length > i; i++) { 
-      if (cnpjSplitted[i - 1] != cnpjSplitted[i]) {  
-        aux = true;   
-      } 
-    } 
-    
-    if (aux == false) {  
-      return false; 
+    // Remove caracteres não alfanuméricos (pontos, barras, traços)
+    final String cnpj = val.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+
+    // O CNPJ deve ter exatamente 14 caracteres (12 base + 2 DVs)
+    if (cnpj.length != 14) {
+      return false;
     }
-    
-    for (int i = 0, p1 = 5, p2 = 13; (cnpjSplitted.length - 2) > i; i++, p1--, p2--) {
-      if (p1 >= 2) {  
-        v1 += int.parse(cnpjSplitted[i]) * p1;  
-      } else {  
-        v1 += int.parse(cnpjSplitted[i]) * p2;  
-      } 
-    } 
-    
-    v1 = v1 % 11;
-    
-    if (v1 < 2) { 
-      v1 = 0; 
-    } else { 
-      v1 = 11 - v1; 
-    } 
-    
-    if (v1 != int.parse(cnpjSplitted[12])) {  
-      return false; 
-    } 
-    
-    for (int i = 0, p1 = 6, p2 = 14; (cnpjSplitted.length - 1) > i; i++, p1--, p2--) { 
-      if (p1 >= 2) {  
-        v2 += int.parse(cnpjSplitted[i]) * p1;  
-      } else {   
-        v2 += int.parse(cnpjSplitted[i]) * p2; 
-      } 
+
+    // Separa os 12 primeiros caracteres e os 2 DVs informados
+    final String base = cnpj.substring(0, 12);
+    final int dv1Informado = int.tryParse(cnpj[12]) ?? -1;
+    final int dv2Informado = int.tryParse(cnpj[13]) ?? -1;
+
+    // --- Cálculo do Primeiro Dígito Verificador ---
+    int somatorio1 = 0;
+    // Pesos para 12 caracteres: 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 
+    final List<int> pesos1 = <int>[5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    for (int i = 0; i < 12; i++) {
+      final int valor = base.codeUnitAt(i) - 48; // Atribuição: Valor ASCII - 48 
+      somatorio1 += valor * pesos1[i]; // Multiplicação de valor e peso [cite: 28]
     }
-    
-    v2 = v2 % 11; 
-    
-    if (v2 < 2) {  
-      v2 = 0;
-    } else { 
-      v2 = 11 - v2; 
-    } 
-    
-    if (v2 != int.parse(cnpjSplitted[13])) {   
-      return false; 
-    } else {  
-      return true; 
+
+    final int resto1 = somatorio1 % 11; // Resto da divisão por 11 [cite: 31]
+    final int dv1Calculado = (resto1 == 0 || resto1 == 1) ? 0 : 11 - resto1; // Lógica do DV [cite: 32, 33]
+
+    if (dv1Calculado != dv1Informado) {
+      return false;
     }
+
+    // --- Cálculo do Segundo Dígito Verificador ---
+    // Para o 2º DV, acrescenta-se o primeiro DV calculado ao final [cite: 38]
+    final String base2 = base + dv1Calculado.toString();
+    int somatorio2 = 0;
+    // Pesos para 13 caracteres: 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 
+    final List<int> pesos2 = <int>[6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    for (int i = 0; i < 13; i++) {
+      final int valor = base2.codeUnitAt(i) - 48;
+      somatorio2 += valor * pesos2[i];
+    }
+
+    final int resto2 = somatorio2 % 11;
+    final int dv2Calculado = (resto2 == 0 || resto2 == 1) ? 0 : 11 - resto2;
+
+    return dv2Calculado == dv2Informado;
   } else {
     return false;
   }
@@ -246,7 +232,7 @@ class CreditCardFormState extends State<CreditCardForm> {
   final MaskedTextController _cardNumberController =
       MaskedTextController(mask: '0000 0000 0000 0000');
   final MaskedTextController _cpfCnpjController =
-      MaskedTextController(mask: '000.000.000-00', maxLength: 18);
+      MaskedTextController(mask: '@@@.@@@.@@@-@@', maxLength: 18);
   final MaskedTextController _expiryDateController =
       MaskedTextController(mask: '00/00');
   final TextEditingController _cardHolderNameController =
@@ -350,11 +336,11 @@ class CreditCardFormState extends State<CreditCardForm> {
   }
 
   void updateCpfCnpjMasks() {
-    if (_cpfCnpjController.text.replaceAll(RegExp(r'\D'), '').length <= 11) {
-      _cpfCnpjController.updateMask('000.000.000-00');
+    if (_cpfCnpjController.text.replaceAll(RegExp(r'[^A-z|0-9]'), '').length <= 11) {
+      _cpfCnpjController.updateMask('@@@.@@@.@@@-@@');
     }
     else {
-      _cpfCnpjController.updateMask('00.000.000/0000-00');
+      _cpfCnpjController.updateMask('@@.@@@.@@@/@@@@-00');
     }
   }
 
@@ -513,53 +499,44 @@ class CreditCardFormState extends State<CreditCardForm> {
                         'Modalidade',
                         style: textStyle,
                       ),
-                      Row(
-                        children: <Widget>[
-                          Transform.scale(
-                            scale: 0.7,
-                            child: Radio<int?>(
-                              value: 0,
-                              visualDensity: VisualDensity.compact,
-                              groupValue: voucherTypeSelected,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  voucherTypeSelected = value;
-                                                
-                                  if (creditCardModel != null) {
-                                    creditCardModel!.voucherType = voucherTypeSelected;
-                                    onCreditCardModelChange(creditCardModel);
-                                  }
-                                });
-                              },
+                      RadioGroup<int?>(
+                        groupValue: voucherTypeSelected,
+                        onChanged: (int? value) {
+                          setState(() {
+                            voucherTypeSelected = value;
+                          
+                            if (creditCardModel != null) {
+                              creditCardModel!.voucherType = voucherTypeSelected;
+                              onCreditCardModelChange(creditCardModel);
+                            }
+                          });
+                        },
+                        child: Row(
+                          children: <Widget>[
+                            Transform.scale(
+                              scale: 0.7,
+                              child: const Radio<int?>(
+                                value: 0,
+                                visualDensity: VisualDensity.compact,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Alimentação',
-                            style: textStyle,
-                          ),
-                          Transform.scale(
-                            scale: 0.7,
-                            child: Radio<int?>(
-                              value: 1,
-                              visualDensity: VisualDensity.compact,
-                              groupValue: voucherTypeSelected,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  voucherTypeSelected = value;
-                                                
-                                  if (creditCardModel != null) {
-                                    creditCardModel!.voucherType = voucherTypeSelected;
-                                    onCreditCardModelChange(creditCardModel);
-                                  }
-                                });
-                              },
+                            Text(
+                              'Alimentação',
+                              style: textStyle,
                             ),
-                          ),
-                          Text(
-                            'Refeição',
-                            style: textStyle,
-                          ),
-                        ],
+                            Transform.scale(
+                              scale: 0.7,
+                              child: const Radio<int?>(
+                                value: 1,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                            Text(
+                              'Refeição',
+                              style: textStyle,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -706,32 +683,39 @@ class CreditCardFormState extends State<CreditCardForm> {
                     cursorColor: widget.cursorColor ?? themeColor,
                     style: textStyle,
                     textAlignVertical: TextAlignVertical.center,
+                    inputFormatters: <TextInputFormatter>[
+                      TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+                        return newValue.copyWith(
+                          text: newValue.text.toUpperCase(),
+                        );
+                      }),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: widget.textFieldsContentPadding,
                       border: const OutlineInputBorder(),
                       labelText: localizedText.cpfCnpjLabelDefault,
                       hintText: localizedText.cardHolderHint,
                       alignLabelWithHint: true,
-                      labelStyle: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? TextStyle(color: Colors.red[800]!) : null,
-                      enabledBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                      labelStyle: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? TextStyle(color: Colors.red[800]!) : null,
+                      enabledBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.red[800]!
                         ),
                       ) : null,
-                      focusedBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                      focusedBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.red[800]!
                         ),
                       ) : null,
                       isDense: true,
                     ),
-                    keyboardType: TextInputType.number,
+                    textCapitalization: TextCapitalization.characters,
                     textInputAction: TextInputAction.done,
                   ),
                 ),
-                creditCardModel!.isCpfCnpjInvalid && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? Container(
+                creditCardModel!.isCpfCnpjInvalid && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
-                  child: creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length <= 11 ? 
+                  child: creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length <= 11 ? 
                     widget.invalidCpfWidget : widget.invalidCnpjWidget,
                 ) : Container(),
               ],
@@ -793,53 +777,44 @@ class CreditCardFormState extends State<CreditCardForm> {
                         'Modalidade',
                         style: textStyle,
                       ),
-                      Row(
-                        children: <Widget>[
-                          Transform.scale(
-                            scale: 0.7,
-                            child: Radio<int?>(
-                              value: 0,
-                              visualDensity: VisualDensity.compact,
-                              groupValue: voucherTypeSelected,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  voucherTypeSelected = value;
-                                                
-                                  if (creditCardModel != null) {
-                                    creditCardModel!.voucherType = voucherTypeSelected;
-                                    onCreditCardModelChange(creditCardModel);
-                                  }
-                                });
-                              },
+                      RadioGroup<int?>(
+                        groupValue: voucherTypeSelected,
+                        onChanged: (int? value) {
+                          setState(() {
+                            voucherTypeSelected = value;
+                          
+                            if (creditCardModel != null) {
+                              creditCardModel!.voucherType = voucherTypeSelected;
+                              onCreditCardModelChange(creditCardModel);
+                            }
+                          });
+                        },
+                        child: Row(
+                          children: <Widget>[
+                            Transform.scale(
+                              scale: 0.7,
+                              child: const Radio<int?>(
+                                value: 0,
+                                visualDensity: VisualDensity.compact,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Alimentação',
-                            style: textStyle,
-                          ),
-                          Transform.scale(
-                            scale: 0.7,
-                            child: Radio<int?>(
-                              value: 1,
-                              visualDensity: VisualDensity.compact,
-                              groupValue: voucherTypeSelected,
-                              onChanged: (int? value) {
-                                setState(() {
-                                  voucherTypeSelected = value;
-                                                
-                                  if (creditCardModel != null) {
-                                    creditCardModel!.voucherType = voucherTypeSelected;
-                                    onCreditCardModelChange(creditCardModel);
-                                  }
-                                });
-                              },
+                            Text(
+                              'Alimentação',
+                              style: textStyle,
                             ),
-                          ),
-                          Text(
-                            'Refeição',
-                            style: textStyle,
-                          ),
-                        ],
+                            Transform.scale(
+                              scale: 0.7,
+                              child: const Radio<int?>(
+                                value: 1,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                            Text(
+                              'Refeição',
+                              style: textStyle,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -986,32 +961,39 @@ class CreditCardFormState extends State<CreditCardForm> {
                     cursorColor: widget.cursorColor ?? themeColor,
                     style: textStyle,
                     textAlignVertical: TextAlignVertical.center,
+                    inputFormatters: <TextInputFormatter>[
+                      TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
+                        return newValue.copyWith(
+                          text: newValue.text.toUpperCase(),
+                        );
+                      }),
+                    ],
                     decoration: InputDecoration(
                       contentPadding: widget.textFieldsContentPadding,
                       border: const OutlineInputBorder(),
                       labelText: localizedText.cpfCnpjLabelDefault,
                       hintText: localizedText.cardHolderHint,
                       alignLabelWithHint: true,
-                      labelStyle: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? TextStyle(color: Colors.red[800]!) : null,
-                      enabledBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                      labelStyle: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? TextStyle(color: Colors.red[800]!) : null,
+                      enabledBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.red[800]!
                         ),
                       ) : null,
-                      focusedBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? OutlineInputBorder(
+                      focusedBorder: !validaCpfCnpj(_cpfCnpjController.text) && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.red[800]!
                         ),
                       ) : null,
                       isDense: true,
                     ),
-                    keyboardType: TextInputType.number,
+                    textCapitalization: TextCapitalization.characters,
                     textInputAction: TextInputAction.done,
                   ),
                 ),
-                creditCardModel!.isCpfCnpjInvalid && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length == 14) ? Container(
+                creditCardModel!.isCpfCnpjInvalid && (creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 11 || creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length == 14) ? Container(
                   margin: EdgeInsets.symmetric(horizontal: firstWidth / widthFactor * 16, vertical: firstHeight / heightFactor),
-                  child: creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'\D'), '').length <= 11 ? 
+                  child: creditCardModel!.cpfCnpj!.replaceAll(RegExp(r'[^A-z|0-9]'), '').length <= 11 ? 
                     widget.invalidCpfWidget : widget.invalidCnpjWidget,
                 ) : Container(),
               ],
